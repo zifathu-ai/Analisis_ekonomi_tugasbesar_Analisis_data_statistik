@@ -7,10 +7,10 @@ Dosen Pengampu: Tri Aji Nugroho, S.T., M.T.
 Topik Utama: Analisis Faktor Utama Penentu Kemiskinan di Pulau Jawa dan Sumatra
 
 Disusun Oleh:
-Zhillal Fathurahman - 0102525020
-Muhammad Raafi Putra Arya - 0102525009
-Panca Pamungkas - 0102525013
-Raya Aulia Abdilah - 0102525016
+- Zhillal Fathurahman - 0102525020
+- Muhammad Raafi Putra Arya - 0102525009
+- Panca Pamungkas - 0102525013
+- Raya Aulia Abdilah - 0102525016
 
 
 # Bagian 1: Ringkasan Konsep Utama

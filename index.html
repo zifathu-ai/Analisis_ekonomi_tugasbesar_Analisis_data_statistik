@@ -1,10 +1,15 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="no-js">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Proyek Akhir — Analisis Kemiskinan Jawa & Sumatra</title>
+
+    <meta property="og:title" content="Executive Dashboard: Analisis Kemiskinan Jawa & Sumatra">
+    <meta property="og:description"
+        content="Analisis pengaruh pengeluaran per kapita terhadap kemiskinan dengan pendekatan Regional Profiling.">
+    <meta property="og:type" content="website">
 
     <script>
         (function () {
@@ -12,165 +17,60 @@
                 var saved = localStorage.getItem('site-theme') || 'dark';
                 document.documentElement.setAttribute('data-theme', saved);
             } catch (e) { }
+            document.documentElement.classList.remove('no-js');
         })();
     </script>
 
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
         rel="stylesheet">
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
     <style>
         /* =========================================
-           1. CSS UTAMA
+           1. CORE VARIABLES & TOKENS
            ========================================= */
         :root {
             --orange: #FF6B2B;
             --yellow: #FFB830;
-            --green: #00C896;
-            --teal: #00B4D8;
-            --purple: #7B5EA7;
+            --green: #00E6A8;
+            --teal: #00F0FF;
+            --purple: #9D72FF;
             --pink: #FF4D8D;
-            --bg: #0F1117;
-            --surface: #181C27;
-            --card: #1E2235;
-            --border: rgba(255, 255, 255, 0.08);
-            --text: #F0F4FF;
-            --muted: #8892A4;
+            --bg: #0A0C10;
+            --surface: #11141D;
+            --card: #181B26;
+            --border: rgba(255, 255, 255, 0.06);
+            --border-glow: rgba(255, 107, 43, 0.4);
+            --text: #E2E8F0;
+            --muted: #8B949E;
             --white: #FFFFFF;
-            --overlay: rgba(255, 255, 255, 0.03);
+            --overlay: rgba(255, 255, 255, 0.02);
+            --hero-grad: radial-gradient(circle at top right, #1a1e2d 0%, #0A0C10 60%);
+            --glass-bg: rgba(24, 27, 38, 0.6);
+            --shadow-float: 0 20px 40px rgba(0, 0, 0, 0.4);
+            --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
             --line-rgb: 255, 255, 255;
-            --hero-grad: linear-gradient(135deg, #0F1117 0%, #161B2E 50%, #0F1117 100%);
-            --particle-alpha-mult: 1;
-            --particle-outline: rgba(0, 0, 0, 0);
+            /* Untuk efek partikel canvas */
         }
 
-        /* ── LIGHT MODE ── */
         html[data-theme="light"] {
-            --bg: #F2F7FC;
+            --bg: #F8FAFC;
             --surface: #FFFFFF;
             --card: #FFFFFF;
-            --border: rgba(15, 35, 65, 0.10);
-            --text: #1B2536;
-            --muted: #5C6B82;
-            --white: #14202F;
-            --overlay: rgba(15, 35, 65, 0.035);
+            --border: rgba(0, 0, 0, 0.08);
+            --border-glow: rgba(0, 240, 255, 0.5);
+            --text: #0F172A;
+            --muted: #64748B;
+            --white: #020617;
+            --overlay: rgba(0, 0, 0, 0.02);
+            --hero-grad: radial-gradient(circle at top right, #E2E8F0 0%, #F8FAFC 60%);
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --shadow-float: 0 20px 40px rgba(0, 0, 0, 0.08);
             --line-rgb: 20, 40, 70;
-            --hero-grad: linear-gradient(135deg, #D9E8F7 0%, #EEF5FC 45%, #D7E6F6 100%);
-            --particle-alpha-mult: 1.35;
-            --particle-outline: rgba(15, 35, 65, 0.18);
-        }
-
-        html[data-theme="light"] .navbar-custom {
-            background: rgba(242, 247, 252, 0.75);
-        }
-
-        /* Kartu beraksen warna (kesimpulan, profil, dsb) perlu opasitas lebih
-           tinggi di mode terang agar tidak menyatu dengan background terang */
-        html[data-theme="light"] .kesimpulan-box {
-            background: rgba(0, 180, 216, 0.12);
-        }
-
-        html[data-theme="light"] .kesimpulan-box:hover {
-            background: rgba(0, 180, 216, 0.20);
-        }
-
-        html[data-theme="light"] .wc-jawa {
-            background: rgba(0, 180, 216, 0.14);
-            border-color: rgba(0, 180, 216, 0.4);
-        }
-
-        html[data-theme="light"] .wc-sum {
-            background: rgba(123, 94, 167, 0.14);
-            border-color: rgba(123, 94, 167, 0.4);
-        }
-
-        html[data-theme="light"] .profil-box {
-            background: rgba(255, 107, 43, 0.10);
-            border-color: rgba(255, 107, 43, 0.3);
-        }
-
-        html[data-theme="light"] .profil-box:hover {
-            background: rgba(255, 107, 43, 0.16);
-        }
-
-        html[data-theme="light"] .thank-you-box {
-            background: rgba(255, 184, 48, 0.12);
-            border-color: rgba(255, 184, 48, 0.35);
-        }
-
-        html[data-theme="light"] .hypo-h0 {
-            background: rgba(92, 107, 130, 0.10);
-            border-color: rgba(92, 107, 130, 0.3);
-        }
-
-        html[data-theme="light"] .hypo-h1 {
-            background: rgba(0, 160, 120, 0.12);
-            border-color: rgba(0, 160, 120, 0.35);
-        }
-
-        html[data-theme="light"] .geo-jawa,
-        html[data-theme="light"] .pearson-jawa {
-            background: rgba(0, 180, 216, 0.14);
-            border-color: rgba(0, 180, 216, 0.4);
-        }
-
-        html[data-theme="light"] .geo-sum,
-        html[data-theme="light"] .pearson-sum {
-            background: rgba(123, 94, 167, 0.14);
-            border-color: rgba(123, 94, 167, 0.4);
-        }
-
-        html[data-theme="light"] .team-card:hover {
-            background: rgba(255, 107, 43, 0.16);
-        }
-
-        html[data-theme="light"] .card,
-        html[data-theme="light"] .stat-box,
-        html[data-theme="light"] .result-block {
-            box-shadow: 0 2px 14px rgba(15, 35, 65, 0.06);
-        }
-
-        body,
-        .navbar-custom {
-            transition: background-color .4s ease, color .4s ease, border-color .4s ease;
-        }
-
-        /* ── THEME TOGGLE SWITCH ── */
-        .theme-toggle {
-            position: relative;
-            width: 50px;
-            height: 26px;
-            border-radius: 50px;
-            background: var(--card);
-            border: 1px solid var(--border);
-            cursor: pointer;
-            flex-shrink: 0;
-            display: inline-flex;
-            align-items: center;
-            padding: 2px;
-            transition: background .3s ease, border-color .3s ease;
-        }
-
-        .theme-toggle .toggle-knob {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--orange), var(--yellow));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 11px;
-            transform: translateX(0);
-            transition: transform .3s cubic-bezier(.4, 0, .2, 1);
-        }
-
-        html[data-theme="light"] .theme-toggle .toggle-knob {
-            transform: translateX(24px);
-            background: linear-gradient(135deg, var(--teal), var(--purple));
+            /* Untuk efek partikel canvas */
         }
 
         *,
@@ -178,12 +78,12 @@
         *::after {
             box-sizing: border-box;
             margin: 0;
-            padding: 0
+            padding: 0;
         }
 
         html {
             scroll-behavior: smooth;
-            scroll-padding-top: 80px;
+            scroll-padding-top: 90px;
         }
 
         body {
@@ -191,153 +91,357 @@
             background: var(--bg);
             color: var(--text);
             line-height: 1.7;
-            overflow-x: hidden
+            overflow-x: hidden;
+            transition: background-color 0.5s ease, color 0.5s ease;
+            scrollbar-width: thin;
+            scrollbar-color: var(--orange) var(--bg);
         }
 
-        /* ── NAVBAR ── */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--orange);
+            border-radius: 10px;
+        }
+
+        /* =========================================
+           2. AMBIENT BACKGROUND & PRELOADER
+           ========================================= */
+        #ambient-blob {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 50vmax;
+            height: 50vmax;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0, 240, 255, 0.1) 0%, rgba(255, 107, 43, 0.05) 40%, transparent 70%);
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: -1;
+            filter: blur(80px);
+            transition: opacity 0.5s ease;
+            will-change: transform;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(var(--border) 1px, transparent 1px),
+                linear-gradient(90deg, var(--border) 1px, transparent 1px);
+            background-size: 40px 40px;
+            mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
+            -webkit-mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        #preloader {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            transition: opacity 0.8s var(--ease-expo), visibility 0.8s;
+        }
+
+        .loader-text {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 4rem;
+            font-weight: 800;
+            letter-spacing: -2px;
+            background: linear-gradient(90deg, var(--teal), var(--orange));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .loader-bar {
+            width: 200px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loader-progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: var(--teal);
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        /* =========================================
+           3. ADVANCED CURSOR
+           ========================================= */
+        @media (hover: hover) and (pointer: fine) {
+            body {
+                cursor: none;
+            }
+
+            .cursor-dot {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 6px;
+                height: 6px;
+                background: var(--teal);
+                border-radius: 50%;
+                pointer-events: none;
+                z-index: 10000;
+                transform: translate(-50%, -50%);
+                transition: width 0.2s, height 0.2s, background 0.2s;
+            }
+
+            .cursor-ring {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 36px;
+                height: 36px;
+                border: 1px solid var(--teal);
+                border-radius: 50%;
+                pointer-events: none;
+                z-index: 9999;
+                transform: translate(-50%, -50%);
+                transition: width 0.3s, height 0.3s, border-color 0.3s, background 0.3s;
+                will-change: transform;
+            }
+
+            .cursor-hover .cursor-dot {
+                background: transparent;
+            }
+
+            .cursor-hover .cursor-ring {
+                width: 60px;
+                height: 60px;
+                background: rgba(0, 240, 255, 0.1);
+                border-color: var(--orange);
+                backdrop-filter: blur(2px);
+            }
+        }
+
+        /* =========================================
+           4. NAVBAR & HUD
+           ========================================= */
         .navbar-custom {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
-            background: rgba(15, 17, 23, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             z-index: 1000;
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 1rem 5%;
             border-bottom: 1px solid var(--border);
-            transition: all 0.3s ease;
+            transition: all 0.4s ease;
         }
 
         .navbar-brand-custom {
             font-family: 'Space Grotesk', sans-serif;
-            font-weight: 700;
+            font-weight: 800;
+            font-size: 1.2rem;
             color: var(--white);
-            font-size: clamp(1rem, 3vw, 1.2rem);
             text-decoration: none;
-            white-space: nowrap;
+            letter-spacing: -0.5px;
         }
 
         .navbar-brand-custom span {
-            color: var(--orange);
+            color: var(--teal);
         }
 
         .navbar-links {
             display: flex;
-            gap: 1.5rem;
-            flex-wrap: wrap;
-            justify-content: flex-end;
+            gap: 2rem;
         }
 
         .navbar-links a {
             color: var(--muted);
             text-decoration: none;
-            font-size: clamp(11px, 2vw, 13px);
-            font-weight: 500;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
             transition: color 0.3s;
-            white-space: nowrap;
+            position: relative;
+        }
+
+        .navbar-links a::before {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 0;
+            width: 0%;
+            height: 2px;
+            background: var(--teal);
+            transition: width 0.3s var(--ease-expo);
         }
 
         .navbar-links a:hover {
-            color: var(--orange);
+            color: var(--white);
         }
 
-        /* ── CANVAS ── */
-        #hero-canvas {
-            position: absolute;
-            inset: 0;
+        .navbar-links a:hover::before {
             width: 100%;
-            height: 100%;
-            z-index: 0
         }
 
-        /* ── HERO ── */
+        #scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            width: 0%;
+            background: linear-gradient(90deg, var(--teal), var(--orange));
+            z-index: 2000;
+            box-shadow: 0 0 10px var(--teal);
+        }
+
+        .theme-toggle {
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--white);
+            transition: transform 0.3s, border-color 0.3s;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            border-color: var(--teal);
+        }
+
+        /* =========================================
+           5. HERO SECTION & PARTICLE CANVAS
+           ========================================= */
         .hero {
             position: relative;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            align-items: center;
             justify-content: center;
-            padding: clamp(3rem, 8vw, 5rem) 1rem clamp(2rem, 5vw, 4rem);
-            overflow: hidden;
+            align-items: center;
             background: var(--hero-grad);
-            transition: background .4s ease;
+            padding: 6rem 2rem 2rem;
+            overflow: hidden;
+            text-align: center;
         }
 
-        .hero-inner {
-            text-align: center;
+        #hero-canvas {
+            position: absolute;
+            inset: 0;
             width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        /* Elevasi seluruh konten hero agar berada di atas canvas */
+        .hero>*:not(#hero-canvas) {
             position: relative;
             z-index: 1;
         }
 
         .hero-badge {
+            font-family: 'JetBrains Mono', monospace;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            background: rgba(255, 107, 43, 0.12);
-            border: 1px solid rgba(255, 107, 43, 0.35);
-            border-radius: 999px;
-            padding: 6px 20px;
-            font-size: clamp(9px, 1.5vw, 11px);
+            gap: 10px;
+            background: rgba(0, 240, 255, 0.08);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: 100px;
+            padding: 8px 24px;
+            font-size: 12px;
             font-weight: 600;
-            letter-spacing: 1.5px;
             text-transform: uppercase;
-            color: #FF6B2B;
+            color: var(--teal);
             margin-bottom: 2rem;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: slideUpFade 0.8s var(--ease-expo) 1s forwards;
         }
 
         .hero-badge span {
-            width: 7px;
-            height: 7px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
-            background: #00C896;
-            display: inline-block;
-            animation: blink 2s ease-in-out infinite
-        }
-
-        @keyframes blink {
-
-            0%,
-            100% {
-                opacity: 1;
-                transform: scale(1)
-            }
-
-            50% {
-                opacity: .3;
-                transform: scale(.6)
-            }
+            background: var(--orange);
+            box-shadow: 0 0 10px var(--orange);
+            animation: pulse-glow 2s infinite;
         }
 
         .hero h1 {
             font-family: 'Space Grotesk', sans-serif;
-            font-size: clamp(1.5rem, 5vw, 3.2rem);
-            font-weight: 700;
+            font-size: clamp(1.8rem, 5vw, 3.8rem);
+            font-weight: 800;
             line-height: 1.15;
             color: var(--white);
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            perspective: 1000px;
+            max-width: 900px;
         }
 
         .hero h1 .accent {
-            background: linear-gradient(90deg, #FF6B2B, #FFB830);
+            background: linear-gradient(135deg, var(--teal), var(--orange));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
         }
 
-        .hero-sub {
-            font-size: clamp(12px, 2.5vw, 15px);
+        .char {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(100%) rotateX(-90deg);
+            transform-origin: bottom center;
+            transition: transform 0.8s var(--ease-expo), opacity 0.8s ease;
+        }
+
+        .word {
+            display: inline-block;
+            overflow: hidden;
+            padding-bottom: 5px;
+            margin-right: 10px;
+        }
+
+        .char.visible {
+            opacity: 1;
+            transform: translateY(0) rotateX(0deg);
+        }
+
+        .typewriter {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: clamp(11px, 1.8vw, 14px);
             color: var(--muted);
-            margin-bottom: 3rem;
-            line-height: 1.8
+            min-height: 40px;
+            margin-bottom: 2rem;
+            border-right: 2px solid var(--teal);
+            padding-right: 5px;
+            max-width: 650px;
+            line-height: 1.6;
+            animation: blink-cursor 0.7s step-end infinite;
         }
 
-        /* META */
+        /* Hero Team Grid & Meta (Disadur dari index.html) */
         .hero-meta {
             display: flex;
             width: 100%;
@@ -345,6 +449,8 @@
             margin: 0 auto 20px;
             justify-content: center;
             padding: 0 1rem;
+            opacity: 0;
+            animation: slideUpFade 0.8s var(--ease-expo) 2.2s forwards;
         }
 
         .meta-card {
@@ -360,7 +466,7 @@
         .meta-card:hover {
             border-color: rgba(255, 107, 43, 0.5);
             transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(255, 107, 43, 0.15)
+            box-shadow: 0 10px 30px rgba(255, 107, 43, 0.15);
         }
 
         .meta-label {
@@ -369,16 +475,15 @@
             text-transform: uppercase;
             color: var(--muted);
             font-weight: 500;
-            margin-bottom: 4px
+            margin-bottom: 4px;
         }
 
         .meta-val {
             font-size: 13px;
             color: var(--text);
-            font-weight: 500
+            font-weight: 500;
         }
 
-        /* TEAM */
         .team-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
@@ -387,6 +492,8 @@
             max-width: 900px;
             margin: 0 auto;
             padding: 0 1rem;
+            opacity: 0;
+            animation: slideUpFade 0.8s var(--ease-expo) 2.5s forwards;
         }
 
         .team-card {
@@ -410,7 +517,7 @@
             width: clamp(32px, 8vw, 38px);
             height: clamp(32px, 8vw, 38px);
             border-radius: 50%;
-            background: linear-gradient(135deg, #FF6B2B, #FFB830);
+            background: linear-gradient(135deg, var(--orange), var(--yellow));
             display: flex;
             align-items: center;
             justify-content: center;
@@ -418,944 +525,643 @@
             font-size: 11px;
             font-weight: 700;
             color: #fff;
+            font-family: 'Space Grotesk', sans-serif;
         }
 
         .team-name {
             font-size: clamp(9px, 1.8vw, 11px);
-            font-weight: 500;
+            font-weight: 600;
             color: var(--text);
-            line-height: 1.4
+            line-height: 1.4;
         }
 
         .team-nim {
             font-size: 9px;
             color: var(--muted);
-            margin-top: 3px
+            margin-top: 3px;
+            font-family: 'JetBrains Mono', monospace;
         }
 
-        /* ── MAIN ── */
+        html[data-theme="light"] .team-card:hover {
+            background: rgba(255, 107, 43, 0.16);
+        }
+
+        /* =========================================
+           6. MAIN SECTION LAYOUTS
+           ========================================= */
         main {
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 0 clamp(1rem, 5vw, 1.5rem) 6rem;
-            width: 100%;
-            max-width: 1100px;
+            padding: 0 1.5rem 6rem;
         }
 
-        /* SECTION */
         .section {
-            padding: clamp(2rem, 5vw, 3.5rem) 0;
+            padding: 5rem 0;
+            position: relative;
             border-bottom: 1px solid var(--border);
         }
 
         .section:last-child {
-            border-bottom: none
+            border-bottom: none;
+        }
+
+        /* Parallax Watermark */
+        .section-watermark {
+            position: absolute;
+            top: 0;
+            right: 0;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 15vw;
+            font-weight: 800;
+            line-height: 1;
+            color: var(--white);
+            opacity: 0.02;
+            pointer-events: none;
+            z-index: -1;
+            will-change: transform;
         }
 
         .section-eyebrow {
-            display: inline-flex;
-            align-items: center;
-            gap: 7px;
-            font-size: clamp(14px, 3vw, 20px);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
             font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
             color: var(--orange);
-            border-left: 2.5px solid var(--orange);
-            padding-left: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
             margin-bottom: 1rem;
+        }
+
+        .section-eyebrow::before {
+            content: '';
+            width: 40px;
+            height: 2px;
+            background: var(--orange);
         }
 
         .section h2 {
             font-family: 'Space Grotesk', sans-serif;
-            font-size: clamp(1.3rem, 4vw, 1.65rem);
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
             font-weight: 700;
             color: var(--white);
-            margin-bottom: .6rem;
-            line-height: 1.3;
+            margin-bottom: 1rem;
         }
 
         .section>p {
-            font-size: clamp(12px, 2vw, 14px);
+            font-size: 15px;
             color: var(--muted);
-            line-height: 1.85;
-            max-width: 700px;
-            margin-bottom: 1.5rem
+            line-height: 1.8;
+            max-width: 800px;
+            margin-bottom: 2rem;
         }
 
-        /* ── CARDS ── */
-        .cards {
+        /* 3D Glass Cards */
+        .grid-cards {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
-            gap: 12px;
-            margin: 1.5rem 0
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
         }
 
-        .card {
+        .glass-card {
             background: var(--card);
             border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: clamp(1rem, 3vw, 1.3rem) clamp(1rem, 3vw, 1.4rem);
-            transition: transform .35s cubic-bezier(.23, 1, .32, 1), box-shadow .35s, border-color .35s;
-            cursor: default;
+            border-radius: 20px;
+            padding: 2rem;
             position: relative;
             overflow: hidden;
+            transform-style: preserve-3d;
+            transition: border-color 0.4s;
         }
 
-        .card::before {
+        .glass-card::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2.5px;
-            background: linear-gradient(90deg, var(--orange), var(--yellow), #FF4D8D);
-            transform: scaleX(0);
-            transform-origin: left;
-            transition: transform .4s cubic-bezier(.23, 1, .32, 1);
+            inset: 0;
+            background: radial-gradient(800px circle at var(--mouse-x) var(--mouse-y), rgba(0, 240, 255, 0.06), transparent 40%);
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
         }
 
-        .card:hover {
-            transform: translateY(-7px);
-            box-shadow: 0 22px 50px rgba(255, 107, 43, 0.22), 0 4px 16px rgba(0, 0, 0, 0.4);
-            border-color: rgba(255, 107, 43, 0.4);
+        .glass-card:hover {
+            border-color: var(--teal);
         }
 
-        .card:hover::before {
-            transform: scaleX(1)
+        .glass-card:hover::before {
+            opacity: 1;
         }
 
+        .glass-card>* {
+            position: relative;
+            z-index: 1;
+            transform: translateZ(20px);
+        }
+
+        /* Icons inside cards */
         .card-icon {
-            font-size: clamp(20px, 4vw, 26px);
-            margin-bottom: .75rem
+            font-size: 28px;
+            margin-bottom: 1rem;
         }
 
-        .card h3 {
+        .glass-card h3 {
             font-family: 'Space Grotesk', sans-serif;
-            font-size: clamp(12px, 2vw, 14px);
+            font-size: 16px;
             font-weight: 600;
             color: var(--yellow);
-            margin-bottom: .4rem
+            margin-bottom: 0.5rem;
         }
 
-        .card p {
-            font-size: clamp(11px, 1.8vw, 13px);
+        .glass-card p {
+            font-size: 14px;
             color: var(--muted);
-            line-height: 1.75;
-            margin: 0
+            line-height: 1.7;
+            margin: 0;
         }
 
-        /* HYPO */
+        /* Hypo Box */
         .hypo-box {
-            border-radius: 12px;
-            padding: clamp(0.8rem, 2vw, 1.3rem);
-            margin: .7rem 0;
+            border-radius: 14px;
+            padding: 1.5rem;
+            margin-top: 1rem;
             border: 1px solid;
-            transition: transform .3s, box-shadow .3s;
-            cursor: default;
+            transition: transform 0.3s;
         }
 
         .hypo-box:hover {
-            transform: translateX(7px)
+            transform: translateX(10px);
         }
 
         .hypo-h0 {
-            background: rgba(139, 146, 164, 0.08);
-            border-color: rgba(139, 146, 164, 0.25)
+            background: rgba(139, 146, 164, 0.05);
+            border-color: rgba(139, 146, 164, 0.2);
         }
 
         .hypo-h1 {
-            background: rgba(0, 200, 150, 0.08);
-            border-color: rgba(0, 200, 150, 0.3)
+            background: rgba(0, 200, 150, 0.05);
+            border-color: rgba(0, 200, 150, 0.2);
         }
 
         .hypo-label {
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 700;
-            letter-spacing: 1.2px;
+            letter-spacing: 1.5px;
             text-transform: uppercase;
-            margin-bottom: 5px
+            margin-bottom: 8px;
         }
 
         .hypo-h0 .hypo-label {
-            color: var(--muted)
+            color: var(--muted);
         }
 
         .hypo-h1 .hypo-label {
-            color: var(--green)
+            color: var(--green);
         }
 
         .hypo-text {
-            font-size: clamp(11px, 1.8vw, 13px);
+            font-size: 14px;
             color: var(--text);
-            line-height: 1.65
+            line-height: 1.6;
         }
 
-        /* STAT ROW */
-        .stat-row {
+        /* Stat Box CountUp */
+        .stat-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(min(100%, 120px), 1fr));
-            gap: clamp(8px, 2vw, 10px);
-            margin: 1.5rem 0
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
         }
 
         .stat-box {
-            background: var(--card);
+            background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: clamp(1rem, 3vw, 1.3rem);
+            border-radius: 16px;
+            padding: 1.5rem;
             text-align: center;
-            transition: transform .35s cubic-bezier(.23, 1, .32, 1), box-shadow .35s, border-color .35s;
-            cursor: default;
         }
 
-        .stat-box:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 18px 44px rgba(255, 184, 48, 0.2);
-            border-color: rgba(255, 184, 48, 0.4)
-        }
-
-        .stat-number {
+        .stat-num {
             font-family: 'Space Grotesk', sans-serif;
-            font-size: clamp(28px, 8vw, 38px);
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--yellow), var(--orange));
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--teal), var(--green));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
             line-height: 1;
+            margin-bottom: 0.5rem;
         }
 
         .stat-label {
-            font-size: clamp(9px, 1.5vw, 11px);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
             color: var(--muted);
             text-transform: uppercase;
-            letter-spacing: .8px;
-            margin-top: 5px
-        }
-
-        /* GEO ROW */
-        .geo-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
-            gap: clamp(8px, 2vw, 10px);
-            margin: 1rem 0
-        }
-
-        .geo-box {
-            border-radius: 14px;
-            padding: clamp(1rem, 3vw, 1.3rem) clamp(1rem, 3vw, 1.4rem);
-            border: 1px solid;
-            transition: transform .35s cubic-bezier(.23, 1, .32, 1), box-shadow .35s;
-            cursor: default;
-        }
-
-        .geo-box:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 18px 44px rgba(0, 180, 216, 0.25)
-        }
-
-        .geo-jawa {
-            background: rgba(0, 180, 216, 0.1);
-            border-color: rgba(0, 180, 216, 0.35)
-        }
-
-        .geo-sum {
-            background: rgba(123, 94, 167, 0.1);
-            border-color: rgba(123, 94, 167, 0.35)
-        }
-
-        .geo-lbl {
-            font-size: clamp(9px, 1.5vw, 11px);
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: .8px
-        }
-
-        .geo-num {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: clamp(24px, 6vw, 32px);
-            font-weight: 700;
-            color: var(--white);
-            line-height: 1.15;
-            margin: .2rem 0;
-        }
-
-        .geo-jawa .geo-num {
-            color: var(--teal)
-        }
-
-        .geo-sum .geo-num {
-            color: #B89BE0
         }
 
         .valid-badge {
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 10px;
             background: rgba(0, 200, 150, 0.08);
             border: 1px solid rgba(0, 200, 150, 0.25);
             border-radius: 12px;
-            padding: .9rem 1.25rem;
-            font-size: clamp(11px, 1.8vw, 13px);
+            padding: 0.9rem 1.25rem;
+            font-size: 13px;
             color: var(--green);
             font-weight: 500;
             margin-top: 1rem;
-            flex-wrap: wrap;
         }
 
-        /* ── INTERACTIVE CHARTS & MAP ── */
-        .chart-container {
-            background: var(--overlay);
+        /* =========================================
+           7. CHARTS & MAP CUSTOMIZATION
+           ========================================= */
+        .chart-wrapper {
+            background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: clamp(1rem, 3vw, 1.5rem);
-            margin: 1.25rem 0;
-            transition: border-color .3s, background .3s, box-shadow .3s;
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
             position: relative;
-            width: 100%;
-            min-height: 300px;
+            box-shadow: var(--shadow-float);
         }
 
-        .chart-container:hover {
-            border-color: rgba(255, 184, 48, 0.4);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        }
-
-        #map {
-            height: clamp(300px, 50vw, 450px);
-            width: 100%;
-            border-radius: 10px;
-            background-color: var(--surface);
-            z-index: 1;
-        }
-
-        .leaflet-popup-content-wrapper,
-        .leaflet-popup-tip {
-            background-color: var(--surface) !important;
-            color: var(--text) !important;
-            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6) !important;
-            border: 1px solid var(--border);
-        }
-
-        .leaflet-popup-content b {
-            color: var(--yellow);
-            font-size: 1.1em;
-        }
-
-        .graf-label {
-            font-size: clamp(10px, 1.8vw, 11px);
-            font-weight: 700;
-            letter-spacing: .8px;
-            text-transform: uppercase;
-            color: var(--muted);
-            margin: 1.5rem 0 .3rem
-        }
-
-        .graf-label:first-of-type {
-            margin-top: .5rem
-        }
-
-        /* KESIMPULAN */
         .kesimpulan-box {
-            background: rgba(0, 180, 216, 0.06);
+            background: rgba(0, 240, 255, 0.05);
             border-left: 3px solid var(--teal);
-            border-radius: 0 12px 12px 0;
-            padding: clamp(0.8rem, 2vw, 1.25rem);
-            margin: .5rem 0;
-            transition: background .3s, transform .3s;
-            cursor: default;
+            border-radius: 0 14px 14px 0;
+            padding: 1.2rem;
+            margin-top: 1rem;
+            transition: background 0.3s, transform 0.3s;
         }
 
         .kesimpulan-box:hover {
-            background: rgba(0, 180, 216, 0.12);
-            transform: translateX(5px)
+            background: rgba(0, 240, 255, 0.1);
+            transform: translateX(8px);
         }
 
         .k-label {
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 700;
-            letter-spacing: 1.3px;
+            letter-spacing: 1.5px;
             text-transform: uppercase;
             color: var(--teal);
-            margin-bottom: 5px
+            margin-bottom: 8px;
         }
 
         .kesimpulan-box p {
-            font-size: clamp(11px, 1.8vw, 13px);
+            font-size: 13px;
             color: var(--muted);
-            line-height: 1.75;
-            margin: 0
+            line-height: 1.7;
+            margin: 0;
         }
 
-        /* PEARSON & REGRESI */
-        .pearson-row {
+        /* Custom Apex Tooltip */
+        .apexcharts-tooltip {
+            background: rgba(10, 12, 16, 0.9) !important;
+            border: 1px solid var(--teal) !important;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.2) !important;
+            border-radius: 8px !important;
+            color: #fff !important;
+            font-family: 'Inter', sans-serif !important;
+            backdrop-filter: blur(10px);
+        }
+
+        .apexcharts-tooltip-title {
+            background: transparent !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+            font-family: 'JetBrains Mono' !important;
+        }
+
+        /* Leaflet Map HUD Style */
+        #map {
+            height: 400px;
+            border-radius: 16px;
+            width: 100%;
+            background: var(--bg);
+            filter: grayscale(0.2) contrast(1.1);
+        }
+
+        .pulse-icon {
+            position: relative;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pulse-core {
+            width: 10px;
+            height: 10px;
+            background: var(--orange);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--orange);
+        }
+
+        .pulse-ring {
+            position: absolute;
+            inset: 0;
+            border: 2px solid var(--orange);
+            border-radius: 50%;
+            animation: radar-pulse 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+
+        .jawa-pulse .pulse-core {
+            background: var(--teal);
+            box-shadow: 0 0 10px var(--teal);
+        }
+
+        .jawa-pulse .pulse-ring {
+            border-color: var(--teal);
+        }
+
+        .leaflet-popup-content-wrapper {
+            background: rgba(24, 27, 38, 0.85) !important;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--teal);
+            color: #fff !important;
+            border-radius: 12px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .leaflet-popup-tip {
+            background: rgba(24, 27, 38, 0.85) !important;
+            border: 1px solid var(--teal);
+        }
+
+        /* =========================================
+           8. MODELING & CONCLUSION STYLES
+           ========================================= */
+        .pearson-row,
+        .reg-row {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
-            gap: clamp(8px, 2vw, 10px);
-            margin-bottom: 1rem
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
         }
 
         .pearson-card {
-            border-radius: 14px;
-            padding: clamp(0.9rem, 2vw, 1.25rem);
+            border-radius: 16px;
+            padding: 1.5rem;
             border: 1px solid;
-            transition: transform .35s cubic-bezier(.23, 1, .32, 1), box-shadow .35s;
-            cursor: default;
-        }
-
-        .pearson-card:hover {
-            transform: translateY(-5px)
+            background: var(--overlay);
         }
 
         .pearson-jawa {
-            background: rgba(0, 180, 216, 0.1);
-            border-color: rgba(0, 180, 216, 0.35)
+            border-color: rgba(0, 240, 255, 0.3);
         }
 
         .pearson-sum {
-            background: rgba(123, 94, 167, 0.1);
-            border-color: rgba(123, 94, 167, 0.35)
-        }
-
-        .pearson-jawa:hover {
-            box-shadow: 0 16px 40px rgba(0, 180, 216, 0.25)
-        }
-
-        .pearson-sum:hover {
-            box-shadow: 0 16px 40px rgba(123, 94, 167, 0.25)
+            border-color: rgba(157, 114, 255, 0.3);
         }
 
         .p-region {
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 1px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
             text-transform: uppercase;
             color: var(--muted);
-            margin-bottom: 6px
+            margin-bottom: 8px;
         }
 
         .p-r {
             font-family: 'Space Grotesk', sans-serif;
-            font-size: clamp(18px, 5vw, 22px);
+            font-size: 24px;
             font-weight: 700;
-            color: var(--white)
+            color: var(--white);
         }
 
         .pearson-jawa .p-r {
-            color: var(--teal)
+            color: var(--teal);
         }
 
         .pearson-sum .p-r {
-            color: #B89BE0
+            color: var(--purple);
         }
 
         .p-pv {
-            font-size: 11px;
+            font-size: 12px;
             color: var(--muted);
-            margin-top: 3px
+            margin-top: 5px;
         }
 
         .p-sig {
             display: inline-flex;
             align-items: center;
-            gap: 5px;
+            padding: 4px 12px;
             background: rgba(0, 200, 150, 0.1);
             border: 1px solid rgba(0, 200, 150, 0.2);
-            border-radius: 999px;
-            padding: 2px 10px;
-            font-size: 10px;
+            border-radius: 100px;
+            font-size: 11px;
             font-weight: 600;
             color: var(--green);
-            margin-top: 6px;
-        }
-
-        .tolak-h0 {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(0, 200, 150, 0.08);
-            border: 1px solid rgba(0, 200, 150, 0.25);
-            border-radius: 12px;
-            padding: .9rem 1.25rem;
-            font-size: clamp(11px, 1.8vw, 13px);
-            font-weight: 600;
-            color: var(--green);
-            margin: 1rem 0;
-            flex-wrap: wrap;
-        }
-
-        .reg-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
-            gap: clamp(8px, 2vw, 10px)
-        }
-
-        .reg-card {
-            background: var(--overlay);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: clamp(0.9rem, 2vw, 1.25rem);
-            position: relative;
-            overflow: hidden;
-            transition: transform .35s cubic-bezier(.23, 1, .32, 1), box-shadow .35s, border-color .35s;
-            cursor: default;
-        }
-
-        .reg-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2.5px;
-            background: linear-gradient(90deg, var(--orange), var(--yellow));
-            transform: scaleX(0);
-            transform-origin: left;
-            transition: transform .4s;
-        }
-
-        .reg-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 16px 40px rgba(255, 107, 43, 0.2);
-            border-color: rgba(255, 107, 43, 0.4);
-        }
-
-        .reg-card:hover::before {
-            transform: scaleX(1)
+            margin-top: 10px;
         }
 
         .rg-title {
-            font-size: 10px;
-            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
             color: var(--muted);
             text-transform: uppercase;
-            letter-spacing: .8px
         }
 
         .rg-r2 {
             font-family: 'Space Grotesk', sans-serif;
-            font-size: clamp(22px, 5vw, 28px);
+            font-size: 24px;
             font-weight: 700;
             background: linear-gradient(135deg, var(--orange), var(--yellow));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin: .4rem 0 .3rem;
+            margin: 8px 0;
         }
 
         .rg-dom {
-            font-size: clamp(11px, 1.8vw, 12px);
-            color: var(--text)
+            font-size: 12px;
+            color: var(--text);
         }
 
         .rg-add {
-            font-size: 11px;
-            color: var(--muted);
-            margin-top: 3px
-        }
-
-        .result-block {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: clamp(1rem, 3vw, 1.4rem);
-            margin-bottom: 12px;
-            transition: border-color .3s, box-shadow .3s;
-        }
-
-        .result-block:hover {
-            border-color: rgba(255, 107, 43, 0.3);
-            box-shadow: 0 8px 30px rgba(255, 107, 43, 0.1)
-        }
-
-        .result-block h4 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: clamp(12px, 2.5vw, 14px);
+            font-size: 12px;
+            color: var(--orange);
             font-weight: 600;
-            color: var(--white);
-            margin-bottom: 1rem;
+            margin-top: 3px;
         }
 
-        /* ANSWER BLOCKS & PROFIL BOX */
         .answer-block {
-            margin: 1.25rem 0
+            margin: 2rem 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
         .ans-header {
             display: flex;
             align-items: center;
             gap: 12px;
-            margin-bottom: .6rem;
-            flex-wrap: wrap;
         }
 
         .ans-num {
-            width: 30px;
-            height: 30px;
+            width: 35px;
+            height: 35px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--orange), var(--yellow));
+            background: linear-gradient(135deg, var(--teal), var(--green));
             display: flex;
             align-items: center;
             justify-content: center;
             font-family: 'Space Grotesk', sans-serif;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 700;
-            color: #fff;
-            flex-shrink: 0;
+            color: #000;
         }
 
         .ans-title {
             font-family: 'Space Grotesk', sans-serif;
-            font-size: clamp(13px, 2.5vw, 15px);
+            font-size: 16px;
             font-weight: 600;
-            color: var(--white)
+            color: var(--white);
         }
 
         .ans-body {
-            font-size: clamp(11px, 1.8vw, 13px);
+            font-size: 14px;
             color: var(--muted);
-            line-height: 1.85;
-            padding-left: 42px
+            line-height: 1.8;
+            padding-left: 47px;
         }
 
         .wilayah-compare {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
-            gap: clamp(8px, 2vw, 10px);
-            margin: 1rem 0 1.25rem
-        }
-
-        .wc {
-            border-radius: 14px;
-            padding: clamp(1rem, 3vw, 1.3rem);
-            border: 1px solid;
-            transition: transform .35s cubic-bezier(.23, 1, .32, 1), box-shadow .35s;
-            cursor: default;
-        }
-
-        .wc-jawa {
-            background: rgba(0, 180, 216, 0.08);
-            border-color: rgba(0, 180, 216, 0.3)
-        }
-
-        .wc-sum {
-            background: rgba(123, 94, 167, 0.08);
-            border-color: rgba(123, 94, 167, 0.3)
-        }
-
-        .wc-jawa:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 18px 44px rgba(0, 180, 216, 0.22)
-        }
-
-        .wc-sum:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 18px 44px rgba(123, 94, 167, 0.22)
-        }
-
-        .wc-label {
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            color: var(--muted);
-            margin-bottom: 6px
-        }
-
-        .wc-dom {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: clamp(12px, 2vw, 14px);
-            font-weight: 600;
-            margin-bottom: 6px
-        }
-
-        .wc-jawa .wc-dom {
-            color: var(--teal)
-        }
-
-        .wc-sum .wc-dom {
-            color: #B89BE0
-        }
-
-        .wc-int {
-            font-size: clamp(11px, 1.8vw, 12px);
-            color: var(--muted);
-            line-height: 1.7
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 1rem 0 2rem;
+            padding-left: 47px;
         }
 
         .profil-box {
-            background: rgba(255, 107, 43, 0.06);
+            background: rgba(255, 107, 43, 0.05);
             border: 1px solid rgba(255, 107, 43, 0.2);
-            border-radius: 14px;
-            padding: clamp(1rem, 3vw, 1.5rem);
-            margin-top: 1rem;
-            transition: background .3s, border-color .3s;
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-top: 2rem;
+            transition: background 0.3s, border-color 0.3s;
         }
 
         .profil-box:hover {
-            background: rgba(255, 107, 43, 0.1);
-            border-color: rgba(255, 107, 43, 0.35)
-        }
-
-        .profil-title {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: clamp(12px, 2.5vw, 14px);
-            font-weight: 700;
-            color: var(--white);
-            margin-bottom: .75rem
+            background: rgba(255, 107, 43, 0.08);
+            border-color: rgba(255, 107, 43, 0.4);
         }
 
         .profil-box ul {
-            padding-left: 1.25rem;
-            font-size: clamp(11px, 1.8vw, 13px);
+            padding-left: 1.5rem;
+            font-size: 14px;
             color: var(--muted);
-            line-height: 2.1
+            line-height: 2;
+            margin-top: 1.5rem;
+        }
+
+        .profil-box li {
+            margin-bottom: 15px;
         }
 
         .profil-box li strong {
             color: var(--yellow);
-            font-weight: 600
-        }
-
-        /* ── SECTION TERIMA KASIH ── */
-        .thank-you-box {
-            background: rgba(255, 184, 48, 0.05);
-            border: 1px solid rgba(255, 184, 48, 0.2);
-            border-radius: 16px;
-            padding: clamp(1.5rem, 5vw, 3rem) clamp(1rem, 3vw, 2rem);
-            margin-top: 1rem;
-            text-align: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .thank-you-box:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 14px 40px rgba(255, 184, 48, 0.15);
-            border-color: rgba(255, 184, 48, 0.4);
-        }
-
-        .thank-you-box h2 {
-            font-family: 'Space Grotesk', sans-serif;
-            color: var(--orange);
-            font-size: clamp(1.8rem, 5vw, 2.2rem);
-            margin-bottom: 1rem;
-            font-weight: 700;
-        }
-
-        .thank-you-box p {
-            color: var(--muted);
-            margin: 0 auto 1.5rem;
-            max-width: 550px;
-            font-size: clamp(12px, 2vw, 14px);
-        }
-
-        .ty-accent {
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 700;
-            color: var(--white);
-            font-size: clamp(1rem, 3vw, 1.2rem);
-            margin-bottom: 2rem;
-        }
-
-        .btn-back-top {
-            display: inline-block;
-            background: linear-gradient(135deg, var(--orange), var(--yellow));
-            color: #fff;
-            padding: clamp(8px, 2vw, 10px) clamp(16px, 4vw, 24px);
-            border-radius: 50px;
-            text-decoration: none;
             font-weight: 600;
-            font-size: clamp(11px, 1.8vw, 13px);
-            transition: transform 0.3s, box-shadow 0.3s;
         }
 
-        .btn-back-top:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(255, 107, 43, 0.3);
-            color: #fff;
+        /* =========================================
+           9. ANIMATIONS & KEYFRAMES
+           ========================================= */
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.5;
+                transform: scale(0.8);
+            }
         }
 
-        ::-webkit-scrollbar {
-            width: 5px
+        @keyframes blink-cursor {
+            50% {
+                border-color: transparent;
+            }
         }
 
-        ::-webkit-scrollbar-track {
-            background: var(--bg)
+        @keyframes slideUpFade {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        ::-webkit-scrollbar-thumb {
-            background: var(--orange);
-            border-radius: 3px
+        @keyframes radar-pulse {
+            0% {
+                transform: scale(0.5);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(2.5);
+                opacity: 0;
+            }
         }
 
-        /* ========================================
-           RESPONSIVE MEDIA QUERIES
-           ======================================== */
+        .dash-container {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
 
-        /* Tablet (576px - 768px) */
+        .btn-magnetic {
+            display: inline-block;
+            padding: 12px 32px;
+            border-radius: 100px;
+            background: linear-gradient(135deg, var(--orange), var(--yellow));
+            color: #000;
+            font-weight: 700;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            font-size: 14px;
+            transition: transform 0.2s;
+            border: none;
+            margin-top: 2rem;
+        }
+
+        /* Responsive */
         @media(max-width:768px) {
-            html {
-                scroll-padding-top: 70px;
-            }
-
-            .navbar-custom {
-                padding: 0.8rem 3%;
-                flex-direction: column;
-                gap: 12px;
-            }
-
-            .navbar-links {
-                gap: 1rem;
-                justify-content: center;
-            }
-
-            main {
-                width: 100%;
-                padding: 0 1rem 4rem;
-            }
-
-            .cards {
-                grid-template-columns: 1fr;
-            }
-
             .wilayah-compare {
-                grid-template-columns: 1fr;
+                padding-left: 0;
             }
 
             .ans-body {
-                padding-left: 12px;
-            }
-        }
-
-        /* Mobile (max-width 576px) */
-        @media(max-width:576px) {
-            html {
-                scroll-padding-top: 60px;
-            }
-
-            .navbar-custom {
-                padding: 0.7rem 2%;
-                gap: 10px;
-            }
-
-            .navbar-brand-custom {
-                font-size: 1rem;
-            }
-
-            .navbar-links {
-                gap: 0.7rem;
-                font-size: 11px;
-            }
-
-            .navbar-links a {
-                font-size: 10px;
-            }
-
-            main {
-                padding: 0 0.75rem 3rem;
-            }
-
-            .section {
-                padding: 1.5rem 0;
-            }
-
-            .section-eyebrow {
-                font-size: 12px;
-            }
-
-            .cards {
-                grid-template-columns: 1fr;
-                gap: 10px;
-            }
-
-            .chart-container {
-                padding: 0.75rem;
-                min-height: 280px;
-            }
-
-            #map {
-                height: 250px;
-            }
-
-            .pearson-row,
-            .reg-row {
-                grid-template-columns: 1fr;
-            }
-
-            .stat-row,
-            .geo-row {
-                grid-template-columns: 1fr;
+                padding-left: 0;
             }
 
             .team-grid {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
-            }
-
-            .wilayah-compare {
-                grid-template-columns: 1fr;
-                gap: 8px;
-            }
-
-            .ans-header {
-                gap: 8px;
-            }
-
-            .ans-body {
-                padding-left: 10px;
-            }
-
-            .thank-you-box {
-                padding: 1.5rem 1rem;
-            }
-
-            .profil-box ul {
-                padding-left: 1rem;
-                font-size: 12px;
-            }
-        }
-
-        /* Extra small devices (max-width 360px) */
-        @media(max-width:360px) {
-            .navbar-custom {
-                padding: 0.6rem 1%;
-                gap: 8px;
-            }
-
-            .navbar-links a {
-                font-size: 9px;
-            }
-
-            main {
-                padding: 0 0.5rem 2rem;
-            }
-
-            .team-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .chart-container {
-                padding: 0.5rem;
-                min-height: 250px;
-            }
-
-            #map {
-                height: 200px;
-            }
-
-            .hero-badge {
-                padding: 4px 12px;
-            }
-        }
-
-        /* Large screens (min-width 1200px) */
-        @media(min-width:1200px) {
-            main {
-                width: 85%;
             }
 
             .navbar-links {
-                gap: 2rem;
+                display: none;
+            }
+        }
+
+        @media(max-width:480px) {
+            .team-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -1363,9 +1169,20 @@
 
 <body>
 
-    <nav class="navbar-custom" data-aos="fade-down" data-aos-duration="800">
+    <div id="preloader">
+        <div class="loader-text" id="loader-num">0%</div>
+        <div class="loader-bar">
+            <div class="loader-progress" id="loader-prog"></div>
+        </div>
+    </div>
+
+    <div id="ambient-blob"></div>
+    <div class="cursor-dot"></div>
+    <div class="cursor-ring"></div>
+
+    <nav class="navbar-custom">
         <a href="#hero" class="navbar-brand-custom">Kelompok<span>5</span></a>
-        <div class="navbar-links">
+        <div class="navbar-links d-none d-md-flex">
             <a href="#hero">Beranda</a>
             <a href="#tahap1">Masalah</a>
             <a href="#tahap2">Data & Peta</a>
@@ -1373,71 +1190,67 @@
             <a href="#tahap5">Modeling</a>
             <a href="#tahap6">Kesimpulan</a>
         </div>
-        <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Ganti mode terang/gelap"
-            title="Ganti mode terang/gelap">
-            <span class="toggle-knob">🌙</span>
-        </button>
+        <button class="theme-toggle hover-target" aria-label="Toggle Theme">🌙</button>
     </nav>
+    <div id="scroll-progress"></div>
 
-    <section id="hero" class="container-fluid hero">
+    <section id="hero" class="hero">
         <canvas id="hero-canvas"></canvas>
-        <div class="hero-inner" data-aos="fade-up" data-aos-duration="900">
-            <div class="hero-badge"><span></span>Proyek Akhir &mdash; Kelompok 5</div>
-            <h1>Analisis <span class="accent">pengaruh pengeluaran per kapita</span> terhadap kemiskinan di Jawa &amp;
-                Sumatra</h1>
-            <p class="hero-sub">Analisis Data Statistik &nbsp;·&nbsp; Program Studi Informatika<br>Universitas Al-Azhar
-                Indonesia &nbsp;·&nbsp; Dosen: Tri Aji Nugroho, S.T., M.T.</p>
 
-            <div class="hero-meta" data-aos="fade-up" data-aos-delay="150">
-                <div class="meta-card text-center">
-                    <div class="meta-label">Kelompok</div>
-                    <div class="meta-val">Kelompok 5</div>
-                </div>
+        <div class="hero-badge hover-target"><span></span> Proyek Akhir &mdash; Kelompok 5</div>
+        <h1 class="split-text">Analisis <span class="accent">pengaruh pengeluaran per kapita</span> terhadap kemiskinan
+            di Jawa & Sumatra</h1>
+        <div class="typewriter" id="typewriter-text"></div>
+
+        <div class="hero-meta hover-target">
+            <div class="meta-card text-center">
+                <div class="meta-label">Kelompok</div>
+                <div class="meta-val">Kelompok 5</div>
             </div>
+        </div>
 
-            <div class="team-grid" data-aos="fade-up" data-aos-delay="250">
-                <div class="team-card">
-                    <div class="avatar">MR</div>
-                    <div class="team-name">Muhammad Raafi Putra Arya</div>
-                    <div class="team-nim">0102525009</div>
-                </div>
-                <div class="team-card">
-                    <div class="avatar">ZF</div>
-                    <div class="team-name">Zhillal Fathurahman</div>
-                    <div class="team-nim">0102525020</div>
-                </div>
-                <div class="team-card">
-                    <div class="avatar">PP</div>
-                    <div class="team-name">Panca Pamungkas</div>
-                    <div class="team-nim">0102525013</div>
-                </div>
-                <div class="team-card">
-                    <div class="avatar">RA</div>
-                    <div class="team-name">Raya Aulia Abdilah</div>
-                    <div class="team-nim">0102525016</div>
-                </div>
+        <div class="team-grid">
+            <div class="team-card hover-target">
+                <div class="avatar">MR</div>
+                <div class="team-name">Muhammad Raafi Putra Arya</div>
+                <div class="team-nim">0102525009</div>
+            </div>
+            <div class="team-card hover-target">
+                <div class="avatar">ZF</div>
+                <div class="team-name">Zhillal Fathurahman</div>
+                <div class="team-nim">0102525020</div>
+            </div>
+            <div class="team-card hover-target">
+                <div class="avatar">PP</div>
+                <div class="team-name">Panca Pamungkas</div>
+                <div class="team-nim">0102525013</div>
+            </div>
+            <div class="team-card hover-target">
+                <div class="avatar">RA</div>
+                <div class="team-name">Raya Aulia Abdilah</div>
+                <div class="team-nim">0102525016</div>
             </div>
         </div>
     </section>
 
     <main>
-
-        <div id="tahap1" class="section">
-            <div class="section-eyebrow" data-aos="fade-right">Tahap 1 &nbsp;-&nbsp; Problem Definition</div>
+        <section id="tahap1" class="section" data-parallax="01">
+            <div class="section-watermark">01</div>
+            <div class="section-eyebrow" data-aos="fade-right">Tahap 1 / Problem Definition</div>
             <h2 data-aos="fade-up">Definisi masalah</h2>
-            <p data-aos="fade-up" data-aos-delay="60">Pulau Jawa dan Sumatra merupakan pilar utama perekonomian
-                nasional. Proyek ini mengevaluasi secara komprehensif seluruh 8 dimensi indikator pada data riil BPS
-                guna memetakan faktor dominan pemicu kemiskinan menggunakan pendekatan Regional Profiling dan
-                Standardized Feature Importance untuk mendukung Evidence-Based Policy.</p>
+            <p data-aos="fade-up">Pulau Jawa dan Sumatra merupakan pilar utama perekonomian nasional. Proyek ini
+                mengevaluasi secara komprehensif seluruh 8 dimensi indikator pada data riil BPS guna memetakan faktor
+                dominan pemicu kemiskinan menggunakan pendekatan Regional Profiling dan Standardized Feature Importance
+                untuk mendukung Evidence-Based Policy.</p>
 
-            <div class="cards">
-                <div class="card" data-aos="fade-up" data-aos-delay="800">
+            <div class="grid-cards mt-4">
+                <div class="glass-card hover-target" data-aos="fade-up" data-aos-delay="100">
                     <div class="card-icon">💡</div>
                     <h3>Q1 — Validasi daya beli</h3>
                     <p>Apakah Pengeluaran per Kapita secara signifikan menjadi penentu linear utama tingkat kemiskinan
                         di Pulau Jawa dan Sumatra?</p>
                 </div>
-                <div class="card" data-aos="fade-up" data-aos-delay="600">
+                <div class="glass-card hover-target" data-aos="fade-up" data-aos-delay="200">
                     <div class="card-icon">📊</div>
                     <h3>Q2 — Faktor dominan</h3>
                     <p>Faktor manakah yang menjadi penentu utama dalam memengaruhi tingkat kemiskinan di masing-masing
@@ -1445,72 +1258,69 @@
                 </div>
             </div>
 
-            <div class="hypo-box hypo-h0" data-aos="fade-up" data-aos-delay="600">
+            <div class="hypo-box hypo-h0 hover-target" data-aos="fade-right" data-aos-delay="100">
                 <div class="hypo-label">H0 — Hipotesis nol</div>
                 <div class="hypo-text">Tidak ada hubungan linear antara Pengeluaran per Kapita dan Persentase
                     Kemiskinan.</div>
             </div>
-            <div class="hypo-box hypo-h1" data-aos="fade-up" data-aos-delay="800">
+            <div class="hypo-box hypo-h1 hover-target" data-aos="fade-right" data-aos-delay="200">
                 <div class="hypo-label">H1 — Hipotesis alternatif</div>
                 <div class="hypo-text">Terdapat hubungan linear negatif signifikan antara Pengeluaran per Kapita dan
                     Persentase Kemiskinan.</div>
             </div>
-        </div>
+        </section>
 
-        <div id="tahap2" class="section">
-            <div class="section-eyebrow" data-aos="fade-right">Tahap 2 &amp; 3 &nbsp;/&nbsp; Data</div>
-            <h2 data-aos="fade-up">Pengumpulan &amp; inspeksi data</h2>
+        <section id="tahap2" class="section" data-parallax="02">
+            <div class="section-watermark">02</div>
+            <div class="section-eyebrow" data-aos="fade-right">Tahap 2 & 3 / Data</div>
+            <h2 data-aos="fade-up">Pengumpulan & inspeksi data</h2>
 
-            <div class="stat-row">
-                <div class="stat-box" data-aos="fade-up" data-aos-delay="600">
-                    <div class="stat-number">273</div>
+            <div class="stat-grid">
+                <div class="stat-box hover-target" data-aos="zoom-in" data-aos-delay="100">
+                    <div class="stat-num count-up" data-target="273">0</div>
                     <div class="stat-label">Total observasi</div>
                 </div>
-                <div class="stat-box" data-aos="fade-up" data-aos-delay="600">
-                    <div class="stat-number">15</div>
+                <div class="stat-box hover-target" data-aos="zoom-in" data-aos-delay="200">
+                    <div class="stat-num count-up" data-target="15">0</div>
                     <div class="stat-label">Kolom</div>
                 </div>
-                <div class="stat-box" data-aos="fade-up" data-aos-delay="600">
-                    <div class="stat-number">8</div>
+                <div class="stat-box hover-target" data-aos="zoom-in" data-aos-delay="300">
+                    <div class="stat-num count-up" data-target="8">0</div>
                     <div class="stat-label">Dimensi indikator</div>
                 </div>
-            </div>
-
-            <div class="geo-row">
-                <div class="geo-box geo-jawa" data-aos="fade-right" data-aos-delay="800">
-                    <div class="geo-lbl">Pulau Jawa</div>
-                    <div class="geo-num">119</div>
-                    <div class="geo-lbl">kabupaten / kota</div>
+                <div class="stat-box hover-target" data-aos="zoom-in" data-aos-delay="400">
+                    <div class="stat-num count-up" data-target="119"
+                        style="background: var(--teal); -webkit-background-clip: text;">0</div>
+                    <div class="stat-label">Pulau Jawa (Kab/Kota)</div>
                 </div>
-                <div class="geo-box geo-sum" data-aos="fade-left" data-aos-delay="800">
-                    <div class="geo-lbl">Pulau Sumatra</div>
-                    <div class="geo-num">154</div>
-                    <div class="geo-lbl">kabupaten / kota</div>
+                <div class="stat-box hover-target" data-aos="zoom-in" data-aos-delay="500">
+                    <div class="stat-num count-up" data-target="154"
+                        style="background: var(--purple); -webkit-background-clip: text;">0</div>
+                    <div class="stat-label">Pulau Sumatra (Kab/Kota)</div>
                 </div>
             </div>
 
-            <div class="valid-badge" data-aos="fade-up" data-aos-delay="600">✅ Validasi lolos — jumlah baris melampaui
-                batas minimum proyek akhir (&gt;200 baris)</div>
+            <div class="valid-badge hover-target" data-aos="fade-up">✅ Validasi lolos — jumlah baris melampaui batas
+                minimum proyek akhir (&gt;200 baris)</div>
 
-            <div class="graf-label" data-aos="fade-up" style="margin-top:2rem">Visualisasi Peta — Sebaran Tingkat
-                Kemiskinan</div>
-            <div class="chart-container" data-aos="fade-up" data-aos-delay="60">
-                <p style="font-size: clamp(11px, 1.8vw, 13px); color: var(--muted); margin-bottom: 10px;">Saiz radius
-                    menandakan besaran peratusan penduduk miskin di wilayah tersebut.</p>
+            <div class="chart-wrapper hover-target mt-5" data-aos="fade-up">
+                <p style="font-family:'JetBrains Mono'; font-size:12px; color:var(--muted); margin-bottom:10px;">>_
+                    VISUALISASI PETA: SEBARAN KEMISKINAN (Saiz radius menandakan besaran peratusan penduduk miskin)</p>
                 <div id="map"></div>
             </div>
-        </div>
+        </section>
 
-        <div id="tahap4" class="section">
-            <div class="section-eyebrow" data-aos="fade-right">Tahap 4 &nbsp;/&nbsp; EDA</div>
+        <section id="tahap4" class="section" data-parallax="03">
+            <div class="section-watermark">03</div>
+            <div class="section-eyebrow" data-aos="fade-right">Tahap 4 / EDA</div>
             <h2 data-aos="fade-up">Exploratory data analysis</h2>
 
-            <div class="graf-label" data-aos="zoom-out" data-aos-delay="1100">Grafik 1 — Boxplot Disparitas Kemiskinan
-            </div>
-            <div class="chart-container" data-aos="zoom-out" data-aos-delay="1100">
+            <div class="chart-wrapper hover-target chart-trigger mt-4" data-aos="fade-up">
+                <p style="font-family:'JetBrains Mono'; font-size:12px; color:var(--muted);">>_ GRAFIK 1: BOXPLOT
+                    DISPARITAS KEMISKINAN</p>
                 <div id="chart-boxplot"></div>
             </div>
-            <div class="kesimpulan-box" data-aos="fade-up" data-aos-delay="800">
+            <div class="kesimpulan-box hover-target" data-aos="fade-left">
                 <div class="k-label">Kesimpulan grafik 1</div>
                 <p>Secara keseluruhan, meskipun Pulau Jawa dan Sumatra memiliki tingkat median kemiskinan yang relatif
                     sama, Sumatra menunjukkan disparitas atau ketimpangan kemiskinan yang lebih tinggi dengan adanya
@@ -1518,127 +1328,98 @@
                     di Pulau Jawa.</p>
             </div>
 
-            <div class="graf-label" data-aos="zoom-in" data-aos-delay="1100" style="margin-top:1.75rem">Grafik 2 —
-                Heatmap Korelasi Pearson
-            </div>
-            <div class="chart-container" data-aos="zoom-in" data-aos-delay="1100">
+            <div class="chart-wrapper hover-target chart-trigger mt-5" data-aos="fade-up">
+                <p style="font-family:'JetBrains Mono'; font-size:12px; color:var(--muted);">>_ GRAFIK 2: HEATMAP
+                    KORELASI PEARSON (BAR CHART)</p>
                 <div id="chart-heatmap"></div>
             </div>
-            <div class="kesimpulan-box" data-aos="fade-up" data-aos-delay="800">
-                <div class="k-label" data-aos="fade-up" data-aos-delay="800">Kesimpulan grafik 2</div>
+            <div class="kesimpulan-box hover-target" data-aos="fade-left">
+                <div class="k-label">Kesimpulan grafik 2</div>
                 <p>Variabel Pengeluaran per Kapita (Ribu Rp) memiliki koefisien korelasi negatif terkuat terhadap
                     Penduduk Miskin (%). Ini menunjukkan adanya hubungan linier terbalik yang solid — semakin tinggi
                     kapasitas daya beli pengeluaran masyarakat, tingkat kemiskinan dipastikan turun.</p>
             </div>
-        </div>
+        </section>
 
-        <div id="tahap5" class="section">
-            <div class="section-eyebrow" data-aos="fade-right" data-aos-delay="800">Tahap 5 &nbsp;/&nbsp; Modeling</div>
-            <h2 data-aos="fade-up">Pemodelan statistik &amp; hasil</h2>
+        <section id="tahap5" class="section" data-parallax="04">
+            <div class="section-watermark">04</div>
+            <div class="section-eyebrow" data-aos="fade-right">Tahap 5 / Modeling</div>
+            <h2 data-aos="fade-up">Pemodelan statistik & hasil</h2>
 
-            <div class="result-block" data-aos="fade-up" data-aos-delay="1000">
-                <h4>📐 Korelasi Pearson (Q1 — validasi daya beli)</h4>
+            <div class="glass-card hover-target mt-4" data-aos="fade-up">
+                <h4 style="font-family: 'Space Grotesk'; font-size: 16px; color: var(--white); margin-bottom: 1rem;">📐
+                    Korelasi Pearson (Q1 — validasi daya beli)</h4>
                 <div class="pearson-row">
-                    <div class="pearson-card pearson-jawa" data-aos="zoom-out" data-aos-delay="1000">
+                    <div class="pearson-card pearson-jawa">
                         <div class="p-region">Pulau Jawa</div>
                         <div class="p-r">r = &minus;0.4152</div>
                         <div class="p-pv">p-value = 0.000003</div>
                         <div class="p-sig">✓ Signifikan</div>
                     </div>
-                    <div class="pearson-card pearson-sum" data-aos="zoom-out" data-aos-delay="1000">
+                    <div class="pearson-card pearson-sum">
                         <div class="p-region">Pulau Sumatra</div>
                         <div class="p-r">r = &minus;0.2824</div>
                         <div class="p-pv">p-value = 0.000388</div>
                         <div class="p-sig">✓ Signifikan</div>
                     </div>
                 </div>
-                <div class="tolak-h0">✅ Tolak H0 — daya beli terbukti menurunkan kemiskinan di kedua pulau</div>
+                <div class="tolak-h0 mt-3"
+                    style="display:inline-flex; align-items:center; gap:10px; background:rgba(0, 200, 150, 0.08); border:1px solid rgba(0, 200, 150, 0.25); border-radius:12px; padding:0.9rem 1.25rem; font-size:13px; font-weight:600; color:var(--green);">
+                    ✅ Tolak H0 — daya beli terbukti menurunkan kemiskinan di kedua pulau
+                </div>
             </div>
 
-            <div class="result-block" data-aos="fade-up" data-aos-delay="800">
-                <h4>📉 Regresi linear berganda (Q2 — faktor dominan)</h4>
+            <div class="glass-card hover-target mt-4" data-aos="fade-up">
+                <h4 style="font-family: 'Space Grotesk'; font-size: 16px; color: var(--white); margin-bottom: 1rem;">📉
+                    Regresi linear berganda (Q2 — faktor dominan)</h4>
                 <div class="reg-row">
-                    <div class="reg-card" data-aos="zoom-in" data-aos-delay="1000">
+                    <div class="pearson-card">
                         <div class="rg-title">Pulau Jawa</div>
                         <div class="rg-r2">coef = 2.8670</div>
                         <div class="rg-dom">Faktor dominan:</div>
                         <div class="rg-add">Lama Sekolah</div>
                     </div>
-                    <div class="reg-card" data-aos="zoom-in" data-aos-delay="1000">
+                    <div class="pearson-card">
                         <div class="rg-title">Pulau Sumatra</div>
-                        <div class="rg-r2">coef = 2.2260</div>
+                        <div class="rg-r2"
+                            style="background: linear-gradient(135deg, var(--teal), var(--purple)); -webkit-background-clip: text;">
+                            coef = 2.2260</div>
                         <div class="rg-dom">Faktor dominan:</div>
-                        <div class="rg-add">Pengeluaran per Kapita</div>
+                        <div class="rg-add" style="color: var(--teal);">Pengeluaran per Kapita</div>
                     </div>
                 </div>
             </div>
+        </section>
 
+        <section id="tahap6" class="section" style="border-bottom:none;" data-parallax="05">
+            <div class="section-watermark">05</div>
+            <div class="section-eyebrow" data-aos="fade-right">Tahap 6 / Interpretasi</div>
+            <h2 data-aos="fade-up">Interpretasi akhir & kesimpulan strategis</h2>
+            <p data-aos="fade-up">Evidence-based policy recommendations untuk Jawa dan Sumatra.</p>
 
-        </div>
-
-        <div id="tahap6" class="section">
-            <div class="section-eyebrow" data-aos="fade-right">Tahap 6 &nbsp;/&nbsp; Interpretasi</div>
-            <h2 data-aos="fade-up" data-aos-delay="600">Interpretasi akhir &amp; kesimpulan strategis</h2>
-            <p data-aos="fade-up" data-aos-delay="600">Evidence-based policy recommendations untuk Jawa dan Sumatra.</p>
-
-            <div class="graf-label" data-aos="flip-left" data-aos-delay="1100">Grafik 3 — Komparasi Faktor Penentu
-                Kemiskinan: Jawa vs Sumatra
-            </div>
-
-            <!-- Dashboard Container (Latar Putih Sesuai Gambar) -->
-            <div style="background-color: #ffffff; color: #222; border-radius: 12px; padding: 2rem 1.5rem; margin-bottom: 2rem; border: 1px solid var(--border);"
-                data-aos="flip-left" data-aos-delay="1100">
-
-                <!-- Judul Dashboard -->
-                <div style="text-align: center; margin-bottom: 2rem;">
-                    <h3
-                        style="font-family: Arial, sans-serif; font-size: clamp(16px, 3vw, 20px); font-weight: bold; color: #222; margin: 0; line-height: 1.3;">
-                        Executive Dashboard Komparasi Faktor Penentu Kemiskinan: Jawa vs Sumatra</h3>
-                    <h4
-                        style="font-family: Arial, sans-serif; font-size: clamp(14px, 2.5vw, 18px); font-weight: bold; color: #222; margin: 5px 0 0 0;">
-                        (Evidence-Based Policy Perencanaan Wilayah)</h4>
+            <div class="dash-container chart-trigger hover-target mt-4" data-aos="zoom-in">
+                <div class="text-center mb-4">
+                    <h3 style="font-family: 'Space Grotesk'; font-size: 1.2rem; color: var(--text);">Grafik 3 —
+                        Komparasi Faktor Penentu Kemiskinan: Jawa vs Sumatra</h3>
+                    <p class="text-muted" style="font-size: 13px;">(Evidence-Based Policy Perencanaan Wilayah)</p>
                 </div>
-
-                <div class="row align-items-center">
-                    <!-- Sisi Kiri (Pulau Jawa) -->
-                    <div class="col-md-6 mb-4 mb-md-0">
-                        <div style="text-align: center; margin-bottom: -15px; position: relative; z-index: 2;">
-                            <div
-                                style="font-family: Arial, sans-serif; font-size: 14px; font-weight: bold; color: #222;">
-                                PULAU JAWA</div>
-                            <div
-                                style="font-family: Arial, sans-serif; font-size: 14px; font-weight: bold; color: #222;">
-                                Kekuatan Indikator Penentu Kemiskinan (R² = 0.579)</div>
-                        </div>
-                        <div style="display: flex; align-items: center;">
-                            <div
-                                style="writing-mode: vertical-rl; transform: rotate(180deg); text-align: center; font-family: Arial, sans-serif; font-size: 13px; color: #222; margin-right: -10px; font-weight: 500;">
-                                8 Indikator Makro</div>
-                            <div id="chart-jawa"
-                                style="flex: 1; border: 1px solid #333; border-top: none; padding-top: 15px;"></div>
-                        </div>
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <h4 class="text-center"
+                            style="color: var(--teal); font-family: 'JetBrains Mono'; font-size: 13px;">[ PULAU JAWA ]
+                            Kekuatan Indikator (R² = 0.579)</h4>
+                        <div id="chart-jawa"></div>
                     </div>
-
-                    <!-- Sisi Kanan (Pulau Sumatra) -->
                     <div class="col-md-6">
-                        <div style="text-align: center; margin-bottom: -15px; position: relative; z-index: 2;">
-                            <div
-                                style="font-family: Arial, sans-serif; font-size: 14px; font-weight: bold; color: #222;">
-                                PULAU SUMATRA</div>
-                            <div
-                                style="font-family: Arial, sans-serif; font-size: 14px; font-weight: bold; color: #222;">
-                                Kekuatan Indikator Penentu Kemiskinan (R² = 0.355)</div>
-                        </div>
-                        <div style="display: flex; align-items: center;">
-                            <div id="chart-sumatra"
-                                style="flex: 1; border: 1px solid #333; border-top: none; padding-top: 15px;"></div>
-                        </div>
+                        <h4 class="text-center"
+                            style="color: var(--orange); font-family: 'JetBrains Mono'; font-size: 13px;">[ PULAU
+                            SUMATRA ] Kekuatan Indikator (R² = 0.355)</h4>
+                        <div id="chart-sumatra"></div>
                     </div>
                 </div>
-
             </div>
 
-            <div class="answer-block" data-aos="fade-up" data-aos-delay="800">
+            <div class="answer-block hover-target" data-aos="fade-up">
                 <div class="ans-header">
                     <div class="ans-num">1</div>
                     <div class="ans-title">Jawaban Q1 — validasi instrumen daya beli</div>
@@ -1648,84 +1429,82 @@
                     konsisten menurunkan angka kemiskinan di Jawa dan Sumatra.</div>
             </div>
 
-            <div class="answer-block" data-aos="fade-up" data-aos-delay="800">
+            <div class="answer-block hover-target" data-aos="fade-up">
                 <div class="ans-header">
                     <div class="ans-num">2</div>
                     <div class="ans-title">Jawaban Q2 — faktor dominan per wilayah</div>
                 </div>
+
+                <div class="wilayah-compare">
+                    <div class="pearson-card pearson-jawa" style="background: rgba(0, 240, 255, 0.03);">
+                        <div class="p-region">Pulau Jawa</div>
+                        <div class="rg-dom"
+                            style="color: var(--teal); font-weight:600; font-size: 14px; margin-bottom: 8px;">Lama
+                            Sekolah</div>
+                        <div class="rg-add" style="color: var(--muted); font-weight:400; line-height: 1.7;">Di Pulau
+                            Jawa, sekadar ngasih bantuan uang/menaikkan daya beli (Pengeluaran per Kapita) TIDAK AKAN
+                            CUKUP untuk mengeluarkan orang dari garis kemiskinan struktural, JIKA orang tersebut tidak
+                            berpendidikan (Lama Sekolah rendah). Di Jawa, persaingan sangat ketat; uang bisa habis, tapi
+                            ijazah dan keahlian (Lama Sekolah) adalah faktor absolut yang menentukan seseorang miskin
+                            atau tidak.</div>
+                    </div>
+                    <div class="pearson-card pearson-sum" style="background: rgba(157, 114, 255, 0.03);">
+                        <div class="p-region">Pulau Sumatra</div>
+                        <div class="rg-dom"
+                            style="color: var(--purple); font-weight:600; font-size: 14px; margin-bottom: 8px;">
+                            Pengeluaran per Kapita (Ribu Rp)</div>
+                        <div class="rg-add" style="color: var(--muted); font-weight:400; line-height: 1.7;">Di Sumatera,
+                            cara paling absolut untuk mengentaskan kemiskinan adalah dengan memompa daya beli masyarakat
+                            (memastikan mereka punya uang untuk belanja) dan memperbaiki fasilitas kesehatan dasar agar
+                            umur harapan hidup naik. Di sini, uang (ekonomi) jauh lebih krusial dibandingkan indikator
+                            lainnya.</div>
+                    </div>
+                </div>
             </div>
 
-            <div class="wilayah-compare">
-                <div class="wc wc-jawa" data-aos="fade-right" data-aos-delay="1000">
-                    <div class="wc-label">Pulau Jawa</div>
-                    <div class="wc-dom">Lama Sekolah</div>
-                    <div class="wc-int">Di Pulau Jawa, sekadar ngasih bantuan uang/menaikkan daya
-                        beli (Pengeluaran per Kapita) TIDAK AKAN CUKUP untuk mengeluarkan orang dari garis kemiskinan
-                        struktural,JIKA orang tersebut tidak berpendidikan (Lama Sekolah rendah). Di Jawa, persaingan
-                        sangat ketat;
-                        uang bisa habis, tapi ijazah dan keahlian (Lama Sekolah) adalah faktor absolut yang menentukan
-                        seseorang miskin atau tidak.</div>
-                </div>
-                <div class="wc wc-sum" data-aos="fade-down" data-aos-delay="1000">
-                    <div class="wc-label">Pulau Sumatra</div>
-                    <div class="wc-dom">Pengeluaran per Kapita (Ribu Rp)</div>
-                    <div class="wc-int">Di Sumatera, cara paling absolut untuk mengentaskan kemiskinan adalah dengan
-                        memompa daya beli masyarakat (memastikan mereka punya uang untuk belanja)
-                        dan memperbaiki fasilitas kesehatan dasar agar umur harapan hidup naik. Di sini, uang
-                        (ekonomi)jauh lebih krusial dibandingkan indikator lainnya.</div>
-                </div>
-            </div>
-
-            <div class="answer-block" data-aos="fade-up" data-aos-delay="800">
+            <div class="answer-block hover-target" data-aos="fade-up">
                 <div class="ans-header">
                     <div class="ans-num">3</div>
                     <div class="ans-title">Kesimpulan profiling wilayah</div>
                 </div>
             </div>
 
-            <div class="profil-box" data-aos="flip-right" data-aos-delay="1000">
-                <div class="profil-title text-center">Rekomendasi kebijakan berbasis bukti</div>
-                <div>
-                    <h3 class="mb-5 text-center">Analisis menunjukkan perbedaan karakteristik sosio-ekonomi yang nyata
-                        antara Jawa
-                        dan Sumatra.
-                    </h3>
-                    <ul>
-                        <li class="mb-3">1. Pulau Jawa: Mengingat kualitas SDM menjadi kunci utama pengentasan
-                            kemiskinan, pemerintah
-                            harus
-                            berfokus pada peningkatan kualitas pendidikan dan program pelatihan vokasi yang relevan
-                            dengan
-                            kebutuhan pasar kerja. Kebijakan harus diarahkan untuk menciptakan tenaga kerja terampil
-                            yang mampu
-                            bersaing di sektor industri dan jasa yang padat kompetisi, sehingga masyarakat dapat keluar
-                            dari
-                            kemiskinan melalui peningkatan produktivitas diri.</li>
-
-                        <li>Pulau Sumatera: Mengingat daya beli dan kesehatan fisik masyarakat adalah faktor yang paling
-                            menentukan, pemerintah harus berfokus pada penguatan stabilitas ekonomi rumah tangga dan
-                            peningkatan
-                            akses kesehatan dasar. Kebijakan diarahkan untuk menjaga daya beli melalui stimulus ekonomi
-                            atau
-                            modal usaha kecil, serta memastikan fasilitas kesehatan tersedia luas agar masyarakat tetap
-                            sehat
-                            dan produktif dalam menggerakkan ekonomi berbasis komoditas dan sumber daya alam.</li>
-                    </ul>
-                </div>
+            <div class="profil-box hover-target" data-aos="zoom-in">
+                <h3 class="text-center" style="font-family: 'Space Grotesk'; font-size: 18px; color: var(--white);">
+                    Rekomendasi kebijakan berbasis bukti</h3>
+                <h4 class="text-center mt-2 mb-4" style="font-size: 14px; color: var(--orange); font-weight: 500;">
+                    Analisis menunjukkan perbedaan karakteristik sosio-ekonomi yang nyata antara Jawa dan Sumatra.</h4>
+                <ul>
+                    <li><strong>1. Pulau Jawa:</strong> Mengingat kualitas SDM menjadi kunci utama pengentasan
+                        kemiskinan, pemerintah harus berfokus pada peningkatan kualitas pendidikan dan program pelatihan
+                        vokasi yang relevan dengan kebutuhan pasar kerja. Kebijakan harus diarahkan untuk menciptakan
+                        tenaga kerja terampil yang mampu bersaing di sektor industri dan jasa yang padat kompetisi,
+                        sehingga masyarakat dapat keluar dari kemiskinan melalui peningkatan produktivitas diri.</li>
+                    <li><strong>2. Pulau Sumatera:</strong> Mengingat daya beli dan kesehatan fisik masyarakat adalah
+                        faktor yang paling menentukan, pemerintah harus berfokus pada penguatan stabilitas ekonomi rumah
+                        tangga dan peningkatan akses kesehatan dasar. Kebijakan diarahkan untuk menjaga daya beli
+                        melalui stimulus ekonomi atau modal usaha kecil, serta memastikan fasilitas kesehatan tersedia
+                        luas agar masyarakat tetap sehat dan produktif dalam menggerakkan ekonomi berbasis komoditas dan
+                        sumber daya alam.</li>
+                </ul>
             </div>
 
-            <div id="thanks" class="section" style="border-bottom: none; padding-bottom: 2rem;">
-                <div class="thank-you-box" data-aos="zoom-in" data-aos-delay="100">
-                    <h2>Terima Kasih</h2>
-                    <p>Proyek analisis data statistik ini disusun untuk memenuhi tugas akhir mata kuliah terkait. Semoga
+            <div class="text-center" style="margin-top: 4rem;">
+                <div class="pearson-card hover-target"
+                    style="display: inline-block; text-align: center; max-width: 600px; padding: 2.5rem;">
+                    <h2
+                        style="font-family: 'Space Grotesk'; color: var(--orange); font-size: 24px; font-weight: 700; margin-bottom: 1rem;">
+                        Terima Kasih</h2>
+                    <p style="color: var(--muted); font-size: 13px; line-height: 1.8; margin-bottom: 1.5rem;">Proyek
+                        analisis data statistik ini disusun untuk memenuhi tugas akhir mata kuliah terkait. Semoga
                         visualisasi dan interpretasi ini memberikan wawasan yang mendalam serta bermanfaat bagi
-                        penelitian
-                        dan perumusan kebijakan ekonomi wilayah ke depannya.</p>
-                    <div class="ty-accent">Kelompok 5</div>
-                    <a href="#hero" class="btn-back-top">Kembali ke Atas ⬆</a>
+                        penelitian dan perumusan kebijakan ekonomi wilayah ke depannya.</p>
+                    <div style="font-family: 'Space Grotesk'; font-weight: 700; color: var(--white); font-size: 15px;">
+                        Kelompok 5</div>
+                    <a href="#hero" class="btn-magnetic">Kembali ke Atas ⬆</a>
                 </div>
             </div>
-
+        </section>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -1734,394 +1513,404 @@
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
     <script>
-        // Inisialisasi AOS
-        AOS.init({
-                    once: false,
-                    offset: 60,
-                    easing: 'ease-out-cubic',
-                    duration: 1200
-                });
-
         /* =========================================
-           THEME TOGGLE (MODE TERANG / GELAP)
+           1. PRELOADER SEQUENCE
            ========================================= */
-        const root = document.documentElement;
-        const themeToggleBtn = document.getElementById('theme-toggle');
-        const themeKnob = themeToggleBtn.querySelector('.toggle-knob');
-        let map, tileLayer, chartBox, chartBarKorelasi;
+        window.addEventListener('load', () => {
+            let prog = 0;
+            const num = document.getElementById('loader-num');
+            const bar = document.getElementById('loader-prog');
+            const preloader = document.getElementById('preloader');
 
-        function applyThemeIcon(theme) {
-            themeKnob.textContent = theme === 'light' ? '☀️' : '🌙';
-        }
-
-        function updateChartsForTheme(theme) {
-            const mode = theme === 'light' ? 'light' : 'dark';
-            const axisColor = theme === 'light' ? '#5C6B82' : '#8892A4';
-            const labelColor = theme === 'light' ? '#1B2536' : '#F0F4FF';
-
-            if (chartBox) {
-                chartBox.updateOptions({ theme: { mode: mode } });
-            }
-            if (chartBarKorelasi) {
-                chartBarKorelasi.updateOptions({
-                    theme: { mode: mode },
-                    xaxis: { labels: { style: { colors: axisColor } } },
-                    yaxis: { labels: { style: { colors: labelColor } } }
-                });
-            }
-            if (map && tileLayer) {
-                map.removeLayer(tileLayer);
-                const tileUrl = theme === 'light'
-                    ? 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
-                    : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
-                tileLayer = L.tileLayer(tileUrl, {
-                    attribution: '&copy; OpenStreetMap &copy; CARTO',
-                    subdomains: 'abcd',
-                    maxZoom: 19
-                }).addTo(map);
-            }
-        }
-
-        function setTheme(theme) {
-            root.setAttribute('data-theme', theme);
-            localStorage.setItem('site-theme', theme);
-            applyThemeIcon(theme);
-            updateChartsForTheme(theme);
-        }
-
-        themeToggleBtn.addEventListener('click', function () {
-            const current = root.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
-            setTheme(current === 'light' ? 'dark' : 'light');
+            const interval = setInterval(() => {
+                prog += Math.floor(Math.random() * 15) + 5;
+                if (prog >= 100) {
+                    prog = 100;
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        preloader.style.opacity = '0';
+                        preloader.style.visibility = 'hidden';
+                        initHeroAnimations();
+                    }, 400);
+                }
+                num.innerText = prog + '%';
+                bar.style.width = prog + '%';
+            }, 80);
         });
 
-        // Terapkan tema tersimpan (default: gelap)
-        const savedTheme = localStorage.getItem('site-theme') || 'dark';
-        root.setAttribute('data-theme', savedTheme);
-        applyThemeIcon(savedTheme);
+        /* =========================================
+           2. ADVANCED HERO TEXT ANIMATION
+           ========================================= */
+        function initHeroAnimations() {
+            // Split Text H1
+            const h1 = document.querySelector('.split-text');
+            const text = h1.innerHTML;
+            h1.innerHTML = text.replace(/<span.*?>.*?<\/span>|[\w\S]+/g, match => {
+                if (match.startsWith('<')) return match;
+                return `<span class="word">${match.split('').map(c => `<span class="char">${c}</span>`).join('')}</span>`;
+            });
+
+            setTimeout(() => {
+                const chars = document.querySelectorAll('.char');
+                chars.forEach((char, i) => {
+                    setTimeout(() => { char.classList.add('visible'); }, i * 30);
+                });
+            }, 300);
+
+            // Typewriter (Subtitle)
+            const tw = document.getElementById('typewriter-text');
+            const str = "Analisis Data Statistik · Program Studi Informatika | Universitas Al-Azhar Indonesia · Dosen: Tri Aji Nugroho, S.T., M.T.";
+            let i = 0;
+            setTimeout(() => {
+                const type = setInterval(() => {
+                    tw.innerHTML += str.charAt(i);
+                    i++;
+                    if (i >= str.length) clearInterval(type);
+                }, 35);
+            }, 1200);
+        }
 
         /* =========================================
-           PARTICLE BG SCRIPT
+           3. MAGNETIC CURSOR & HOVER EFFECTS
            ========================================= */
-        const canvas = document.getElementById('hero-canvas');
-        const ctx = canvas.getContext('2d');
+        const cursorDot = document.querySelector('.cursor-dot');
+        const cursorRing = document.querySelector('.cursor-ring');
+        const ambient = document.getElementById('ambient-blob');
 
-        function resize() { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight }
-        resize();
-        window.addEventListener('resize', () => { resize(); init() });
+        let mouseX = window.innerWidth / 2; let mouseY = window.innerHeight / 2;
+        let ringX = mouseX; let ringY = mouseY;
+        let ambX = mouseX; let ambY = mouseY;
 
-        const COLS = ['#FF6B2B', '#FFB830', '#00C896', '#00B4D8', '#7B5EA7', '#FF4D8D'];
-        let pts = [];
-
-        function rand(a, b) { return Math.random() * (b - a) + a }
-
-        function init() {
-            pts = [];
-            const N = Math.floor(canvas.width * canvas.height / 7500);
-            for (let i = 0; i < N; i++) pts.push({
-                x: rand(0, canvas.width), y: rand(0, canvas.height),
-                r: rand(.8, 3), vx: rand(-.3, .3), vy: rand(-.2, .2),
-                color: COLS[Math.floor(Math.random() * COLS.length)],
-                alpha: rand(.15, .5), ph: rand(0, Math.PI * 2), ps: rand(.01, .025)
-            });
-        }
-        init();
-
-        function hex2rgb(h) { const r = parseInt(h.slice(1, 3), 16), g = parseInt(h.slice(3, 5), 16), b = parseInt(h.slice(5, 7), 16); return `${r},${g},${b}` }
-
-        function tick() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            const lineRGB = getComputedStyle(root).getPropertyValue('--line-rgb').trim() || '255,255,255';
-
-            for (let i = 0; i < pts.length; i++) {
-                for (let j = i + 1; j < pts.length; j++) {
-                    const dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y, d = Math.hypot(dx, dy);
-                    if (d < 120) {
-                        ctx.beginPath();
-                        ctx.strokeStyle = `rgba(${lineRGB},${(1 - d / 120) * .08})`;
-                        ctx.lineWidth = .5;
-                        ctx.moveTo(pts[i].x, pts[i].y);
-                        ctx.lineTo(pts[j].x, pts[j].y);
-                        ctx.stroke();
-                    }
-                }
+        window.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX; mouseY = e.clientY;
+            if (cursorDot) {
+                cursorDot.style.transform = `translate(${mouseX}px, ${mouseY}px) translate(-50%, -50%)`;
             }
+        });
 
-            pts.forEach(p => {
-                p.ph += p.ps;
-                const a = p.alpha + Math.sin(p.ph) * .1;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(${hex2rgb(p.color)},${a})`;
-                ctx.fill();
-                p.x += p.vx; p.y += p.vy;
-                if (p.x < -10) p.x = canvas.width + 10;
-                if (p.x > canvas.width + 10) p.x = -10;
-                if (p.y < -10) p.y = canvas.height + 10;
-                if (p.y > canvas.height + 10) p.y = -10;
-            });
+        function renderCursor() {
+            ringX += (mouseX - ringX) * 0.15;
+            ringY += (mouseY - ringY) * 0.15;
+            ambX += (mouseX - ambX) * 0.05;
+            ambY += (mouseY - ambY) * 0.05;
 
-            requestAnimationFrame(tick);
+            if (cursorRing) cursorRing.style.transform = `translate(${ringX}px, ${ringY}px) translate(-50%, -50%)`;
+            if (ambient) ambient.style.transform = `translate(${ambX}px, ${ambY}px) translate(-50%, -50%)`;
+            requestAnimationFrame(renderCursor);
         }
-        tick();
+        requestAnimationFrame(renderCursor);
+
+        document.querySelectorAll('.hover-target, a, button').forEach(el => {
+            el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+            el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+        });
+
+        document.querySelectorAll('.btn-magnetic').forEach(btn => {
+            btn.addEventListener('mousemove', (e) => {
+                const rect = btn.getBoundingClientRect();
+                const x = (e.clientX - rect.left - rect.width / 2) * 0.3;
+                const y = (e.clientY - rect.top - rect.height / 2) * 0.3;
+                btn.style.transform = `translate(${x}px, ${y}px)`;
+            });
+            btn.addEventListener('mouseleave', () => { btn.style.transform = `translate(0px, 0px)`; });
+        });
+
+        document.querySelectorAll('.glass-card, .chart-wrapper, .dash-container').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left; const y = e.clientY - rect.top;
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+
+                const centerX = rect.width / 2; const centerY = rect.height / 2;
+                const rotateX = ((y - centerY) / centerY) * -3;
+                const rotateY = ((x - centerX) / centerX) * 3;
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg)`;
+            });
+        });
 
         /* =========================================
-           INTERACTIVE CHARTS & MAP
+           4. SCROLL LOGIC & INITIALIZATION
            ========================================= */
-        document.addEventListener("DOMContentLoaded", function () {
+        const progressBar = document.getElementById('scroll-progress');
+        const watermarks = document.querySelectorAll('.section-watermark');
 
-            // 1. LEAFLET MAP
-            map = L.map('map').setView([-2.5, 107.0], 5);
-            const initialTheme = root.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
-            const initialTileUrl = initialTheme === 'light'
-                ? 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
-                : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
-            tileLayer = L.tileLayer(initialTileUrl, {
-                attribution: '&copy; OpenStreetMap &copy; CARTO',
-                subdomains: 'abcd',
-                maxZoom: 19
-            }).addTo(map);
+        window.addEventListener('scroll', () => {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            progressBar.style.width = (winScroll / height) * 100 + "%";
 
-            var provinces = [
-                { name: "Jawa Barat", lat: -6.9204, lon: 107.6046, poverty: 9.0, region: "Jawa" },
-                { name: "Jawa Tengah", lat: -7.1509, lon: 110.1402, poverty: 11.3, region: "Jawa" },
-                { name: "Jawa Timur", lat: -7.5360, lon: 112.2384, poverty: 11.4, region: "Jawa" },
-                { name: "DKI Jakarta", lat: -6.2088, lon: 106.8456, poverty: 4.5, region: "Jawa" },
-                { name: "Sumatera Utara", lat: 2.1153, lon: 99.5451, poverty: 11.5, region: "Sumatra" },
-                { name: "Aceh", lat: 4.6951, lon: 96.7493, poverty: 15.6, region: "Sumatra" },
-                { name: "Sumatera Selatan", lat: -3.3194, lon: 104.9147, poverty: 12.0, region: "Sumatra" },
-                { name: "Riau", lat: 0.2933, lon: 101.7068, poverty: 7.0, region: "Sumatra" },
-                { name: "Lampung", lat: -4.5585, lon: 105.4068, poverty: 11.1, region: "Sumatra" }
-            ];
+            watermarks.forEach(wm => {
+                const speed = 0.15;
+                const rect = wm.parentElement.getBoundingClientRect();
+                if (rect.top < window.innerHeight && rect.bottom > 0) {
+                    wm.style.transform = `translateY(${rect.top * speed}px)`;
+                }
+            });
+        });
 
-            provinces.forEach(p => {
-                var color = p.region === 'Jawa' ? '#00B4D8' : '#FF6B2B';
-                L.circleMarker([p.lat, p.lon], {
-                    radius: p.poverty * 1.5,
-                    color: color,
-                    fillColor: color,
-                    fillOpacity: 0.6,
-                    weight: 2
-                }).bindPopup(`<b>Provinsi ${p.name}</b><br>Kemiskinan: ${p.poverty}%<br>Wilayah: ${p.region}`).addTo(map);
+        // AOS
+        AOS.init({ once: true, offset: 50, duration: 800 });
+
+        // CountUp
+        const countObserver = new IntersectionObserver((entries, obs) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const el = entry.target;
+                    const target = +el.getAttribute('data-target');
+                    let count = 0;
+                    const inc = target / 50;
+                    const update = () => {
+                        count += inc;
+                        if (count < target) {
+                            el.innerText = Math.ceil(count);
+                            requestAnimationFrame(update);
+                        } else {
+                            el.innerText = target;
+                        }
+                    };
+                    update();
+                    obs.unobserve(el);
+                }
+            });
+        }, { threshold: 0.8 });
+        document.querySelectorAll('.count-up').forEach(c => countObserver.observe(c));
+
+        /* =========================================
+           5. LEAFLET MAP
+           ========================================= */
+        const map = L.map('map').setView([-2.5, 107.0], 5);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; CARTO', subdomains: 'abcd', maxZoom: 19
+        }).addTo(map);
+
+        const provinces = [
+            { name: "Jawa Barat", lat: -6.9204, lon: 107.6046, poverty: 9.0, region: "Jawa" },
+            { name: "Jawa Tengah", lat: -7.1509, lon: 110.1402, poverty: 11.3, region: "Jawa" },
+            { name: "Jawa Timur", lat: -7.5360, lon: 112.2384, poverty: 11.4, region: "Jawa" },
+            { name: "DKI Jakarta", lat: -6.2088, lon: 106.8456, poverty: 4.5, region: "Jawa" },
+            { name: "Sumatera Utara", lat: 2.1153, lon: 99.5451, poverty: 11.5, region: "Sumatra" },
+            { name: "Aceh", lat: 4.6951, lon: 96.7493, poverty: 15.6, region: "Sumatra" },
+            { name: "Sumatera Selatan", lat: -3.3194, lon: 104.9147, poverty: 12.0, region: "Sumatra" },
+            { name: "Riau", lat: 0.2933, lon: 101.7068, poverty: 7.0, region: "Sumatra" },
+            { name: "Lampung", lat: -4.5585, lon: 105.4068, poverty: 11.1, region: "Sumatra" }
+        ];
+
+        provinces.forEach(p => {
+            const isJawa = p.region === 'Jawa';
+            const iconClass = isJawa ? 'pulse-icon jawa-pulse' : 'pulse-icon';
+            const customIcon = L.divIcon({
+                className: 'custom-div-icon',
+                html: `<div class='${iconClass}'><div class='pulse-ring'></div><div class='pulse-core' style="transform: scale(${p.poverty / 7})"></div></div>`,
+                iconSize: [30, 30]
             });
 
-            // Handle map resize on window resize
-            window.addEventListener('resize', function () {
-                setTimeout(function () {
-                    map.invalidateSize();
-                }, 100);
+            const colorHTML = isJawa ? 'var(--teal)' : 'var(--orange)';
+            L.marker([p.lat, p.lon], { icon: customIcon })
+                .bindPopup(`
+                    <div style="font-family:'Space Grotesk'; border-bottom:1px solid ${colorHTML}; margin-bottom:5px; padding-bottom:5px;">
+                        <span style="color:${colorHTML}; font-size:10px;">>_ REGION: ${p.region.toUpperCase()}</span><br>
+                        <strong style="font-size:16px;">${p.name}</strong>
+                    </div>
+                    <span style="color:var(--muted); font-family:'JetBrains Mono'; font-size:11px;">Kemiskinan:</span> 
+                    <span style="font-size:14px; font-weight:bold;">${p.poverty}%</span>
+                `)
+                .addTo(map);
+        });
+
+        /* =========================================
+           6. APEXCHARTS CONFIG
+           ========================================= */
+        const textCol = '#8B949E';
+
+        // 1. Boxplot (Disparitas)
+        const boxOptions = {
+            series: [{
+                type: 'boxPlot',
+                data: [
+                    { x: 'P. Jawa', y: [4.5, 7.5, 9.0, 11.3, 14.5] },
+                    { x: 'P. Sumatra', y: [6.0, 9.5, 11.5, 13.0, 18.0] }
+                ]
+            }],
+            chart: { type: 'boxPlot', height: 320, background: 'transparent', toolbar: { show: false }, dropShadow: { enabled: true, top: 5, left: 0, blur: 5, color: '#000', opacity: 0.3 } },
+            theme: { mode: 'dark' },
+            colors: ['#00F0FF', '#FFB830'],
+            stroke: { colors: ['#475569'] },
+            xaxis: { labels: { style: { colors: textCol, fontFamily: 'JetBrains Mono' } } },
+            yaxis: { labels: { style: { colors: textCol } } },
+            plotOptions: { boxPlot: { colors: { upper: '#00F0FF', lower: '#FF6B2B' } } },
+            grid: { borderColor: 'rgba(255,255,255,0.05)' }
+        };
+
+        // 2. Korelasi Bar (Heatmap Replacement)
+        const corrOptions = {
+            series: [{ name: 'Pearson (r)', data: [0.22, -0.21, -0.31, -0.31, -0.31, -0.32, -0.44, -0.55] }],
+            chart: { type: 'bar', height: 450, background: 'transparent', toolbar: { show: false } },
+            theme: { mode: 'dark' },
+            plotOptions: { bar: { horizontal: true, barHeight: '50%', borderRadius: 4, distributed: true } },
+            colors: ['#00F0FF', '#FF4D8D', '#FF4D8D', '#FF4D8D', '#FF4D8D', '#FF4D8D', '#FF4D8D', '#FF6B2B'],
+            dataLabels: { enabled: false },
+            xaxis: {
+                categories: ['Partisipasi Kerja (%)', 'Air Minum Layak (%)', 'PDRB (Rp)', 'Umur Harapan Hidup (Thn)', 'Pengangguran (%)', 'Sanitasi Layak (%)', 'Lama Sekolah (Thn)', 'Pengeluaran per Kapita (Ribu Rp)'],
+                labels: { style: { colors: textCol } }
+            },
+            yaxis: { labels: { style: { colors: textCol, fontFamily: 'JetBrains Mono', fontSize: '10px' } } },
+            grid: { borderColor: 'rgba(255,255,255,0.05)', strokeDashArray: 4 }
+        };
+
+        // 3. Regresi Jawa
+        const jawaOptions = {
+            series: [{ name: 'Beta Coefficient', data: [-2.85, -0.61, -0.55, 0.55, -0.31, 0.27, -0.09, 0.09] }],
+            chart: { type: 'bar', height: 400, background: 'transparent', toolbar: { show: false } },
+            theme: { mode: 'dark' },
+            plotOptions: { bar: { horizontal: true, barHeight: '50%', borderRadius: 2, colors: { ranges: [{ from: -10, to: 0, color: '#00F0FF' }, { from: 0.001, to: 10, color: '#9D72FF' }] } } },
+            dataLabels: { enabled: false },
+            xaxis: { title: { text: 'Standardized Beta Coefficient', style: { color: textCol, fontFamily: 'Arial', fontWeight: 500 } }, categories: ['Lama Sekolah', 'Pengangguran', 'PDRB', 'Pengeluaran/Kapita', 'Sanitasi Layak', 'Umur Harapan Hidup', 'Air Minum Layak', 'Partisipasi Angkatan Kerja'], labels: { style: { colors: textCol } } },
+            yaxis: { labels: { style: { colors: textCol, fontSize: '11px' } } },
+            grid: { show: false },
+            annotations: { xaxis: [{ x: 0, strokeDashArray: 0, borderColor: '#fff' }] }
+        };
+
+        // 4. Regresi Sumatra
+        const sumatraOptions = {
+            series: [{ name: 'Beta Coefficient', data: [-2.45, -1.22, 0.51, 0.35, 0.26, -0.19, 0.14, -0.02] }],
+            chart: { type: 'bar', height: 400, background: 'transparent', toolbar: { show: false } },
+            theme: { mode: 'dark' },
+            plotOptions: { bar: { horizontal: true, barHeight: '50%', borderRadius: 2, colors: { ranges: [{ from: -10, to: 0, color: '#FF6B2B' }, { from: 0.001, to: 10, color: '#FFB830' }] } } },
+            dataLabels: { enabled: false },
+            xaxis: { title: { text: 'Standardized Beta Coefficient', style: { color: textCol, fontFamily: 'Arial', fontWeight: 500 } }, categories: ['Pengeluaran/Kapita', 'Umur Harapan Hidup', 'Pengangguran', 'Air Minum Layak', 'Lama Sekolah', 'Sanitasi Layak', 'Partisipasi Angkatan Kerja', 'PDRB'], labels: { style: { colors: textCol } } },
+            yaxis: { labels: { style: { colors: textCol, fontSize: '11px' } } },
+            grid: { show: false },
+            annotations: { xaxis: [{ x: 0, strokeDashArray: 0, borderColor: '#fff' }] }
+        };
+
+        const cBox = new ApexCharts(document.querySelector("#chart-boxplot"), boxOptions);
+        const cCorr = new ApexCharts(document.querySelector("#chart-heatmap"), corrOptions);
+        const cJawa = new ApexCharts(document.querySelector("#chart-jawa"), jawaOptions);
+        const cSum = new ApexCharts(document.querySelector("#chart-sumatra"), sumatraOptions);
+
+        const chartObserver = new IntersectionObserver((entries, obs) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    if (entry.target.querySelector('#chart-boxplot') && !cBox.rendered) { cBox.render(); cBox.rendered = true; }
+                    if (entry.target.querySelector('#chart-heatmap') && !cCorr.rendered) { cCorr.render(); cCorr.rendered = true; }
+                    if (entry.target.querySelector('#chart-jawa') && !cJawa.rendered) { cJawa.render(); cJawa.rendered = true; }
+                    if (entry.target.querySelector('#chart-sumatra') && !cSum.rendered) { cSum.render(); cSum.rendered = true; }
+                }
             });
+        }, { threshold: 0.2 });
+        document.querySelectorAll('.chart-trigger').forEach(el => chartObserver.observe(el));
 
-            // 2. BOXPLOT DISPARITAS
-            var optionsBox = {
-                series: [{
-                    type: 'boxPlot',
-                    data: [
-                        { x: 'Pulau Jawa', y: [4.5, 7.5, 9.0, 11.3, 14.5] },
-                        { x: 'Pulau Sumatra', y: [6.0, 9.5, 11.5, 13.0, 18.0] }
-                    ]
-                }],
-                chart: {
-                    type: 'boxPlot',
-                    height: 350,
-                    width: '100%',
-                    background: 'transparent',
-                    toolbar: { show: false },
-                    responsive: [{
-                        breakpoint: 1200,
-                        options: { chart: { height: 340 } }
-                    },
-                    {
-                        breakpoint: 768,
-                        options: { chart: { height: 300 } }
-                    },
-                    {
-                        breakpoint: 576,
-                        options: { chart: { height: 280 } }
-                    }]
-                },
-                theme: { mode: 'dark' },
-                colors: ['#00C896', '#FFB830'],
-                plotOptions: { boxPlot: { colors: { upper: '#00B4D8', lower: '#FF6B2B' } } },
-                stroke: { colors: ['#8892A4'] }
-            };
+        /* =========================================
+           7. THEME TOGGLE (Morphing Logic)
+           ========================================= */
+        const themeBtn = document.querySelector('.theme-toggle');
+        themeBtn.addEventListener('click', () => {
+            const root = document.documentElement;
+            const isLight = root.getAttribute('data-theme') === 'light';
+            const newTheme = isLight ? 'dark' : 'light';
 
-            chartBox = new ApexCharts(document.querySelector("#chart-boxplot"), optionsBox);
-            if (chartBox) {
-                chartBox.render();
+            root.setAttribute('data-theme', newTheme);
+            localStorage.setItem('site-theme', newTheme);
+            themeBtn.innerHTML = newTheme === 'light' ? '☀️' : '🌙';
+
+            const tileUrl = newTheme === 'light' ? 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png' : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+            map.eachLayer(layer => { if (layer instanceof L.TileLayer) map.removeLayer(layer); });
+            L.tileLayer(tileUrl, { attribution: '&copy; CARTO' }).addTo(map);
+
+            const chartTheme = { theme: { mode: newTheme } };
+            if (cBox.rendered) cBox.updateOptions(chartTheme);
+            if (cCorr.rendered) cCorr.updateOptions(chartTheme);
+            if (cJawa.rendered) cJawa.updateOptions(chartTheme);
+            if (cSum.rendered) cSum.updateOptions(chartTheme);
+        });
+
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        themeBtn.innerHTML = currentTheme === 'light' ? '☀️' : '🌙';
+
+        /* =========================================
+           8. CANVAS PARTICLE SCRIPT (Dari index.html)
+           ========================================= */
+        const heroCanvas = document.getElementById('hero-canvas');
+        if (heroCanvas) {
+            const ctx = heroCanvas.getContext('2d');
+
+            function resize() {
+                heroCanvas.width = heroCanvas.offsetWidth;
+                heroCanvas.height = heroCanvas.offsetHeight;
+            }
+            resize();
+            window.addEventListener('resize', () => { resize(); initParticles(); });
+
+            const COLS = ['#FF6B2B', '#FFB830', '#00E6A8', '#00F0FF', '#9D72FF', '#FF4D8D'];
+            let pts = [];
+
+            function rand(a, b) { return Math.random() * (b - a) + a; }
+
+            function initParticles() {
+                pts = [];
+                const N = Math.floor(heroCanvas.width * heroCanvas.height / 7500);
+                for (let i = 0; i < N; i++) {
+                    pts.push({
+                        x: rand(0, heroCanvas.width), y: rand(0, heroCanvas.height),
+                        r: rand(0.8, 3), vx: rand(-0.3, 0.3), vy: rand(-0.2, 0.2),
+                        color: COLS[Math.floor(Math.random() * COLS.length)],
+                        alpha: rand(0.15, 0.5), ph: rand(0, Math.PI * 2), ps: rand(0.01, 0.025)
+                    });
+                }
+            }
+            initParticles();
+
+            function hex2rgb(h) {
+                const r = parseInt(h.slice(1, 3), 16),
+                    g = parseInt(h.slice(3, 5), 16),
+                    b = parseInt(h.slice(5, 7), 16);
+                return `${r},${g},${b}`;
             }
 
-            // 3. BAR CHART KORELASI (Menggantikan Heatmap)
-            var optionsBarKorelasi = {
-                series: [{
-                    name: 'Nilai Korelasi (r)',
-                    data: [0.22, -0.21, -0.31, -0.31, -0.31, -0.32, -0.44, -0.55]
-                    // Sesuaikan angka ini dengan data korelasi asli Anda
-                }],
-                chart: {
-                    type: 'bar',
-                    height: 450,
-                    toolbar: { show: false }
-                },
-                plotOptions: {
-                    bar: {
-                        horizontal: true,
-                        barHeight: '60%',
-                        distributed: true // Penting agar warna bisa dibedakan per batang
-                    }
-                },
-                colors: [
-                    '#87CEEB', // Biru muda (untuk positif)
-                    '#FF0000', // Merah (untuk negatif)
-                    '#FF0000',
-                    '#FF0000',
-                    '#FF0000',
-                    '#FF0000',
-                    '#FF0000',
-                    '#FF0000'
-                ],
-                dataLabels: {
-                    enabled: false
-                },
-                stroke: {
-                    width: 1,
-                    colors: ['#000']
-                },
-                xaxis: {
-                    categories: [
-                        'Partisipasi Angkatan Kerja (%)',
-                        'Air Minum Layak (%)',
-                        'PDRB (Rp)',
-                        'Umur Harapan Hidup (Thn)',
-                        'Pengangguran (%)',
-                        'Sanitasi Layak (%)',
-                        'Lama Sekolah (Thn)',
-                        'Pengeluaran per Kapita (Ribu Rp)'
-                    ],
-                    labels: { style: { colors: '#8892A4' } }
-                },
-                yaxis: {
-                    labels: { style: { colors: '#F0F4FF' } }
-                },
-                theme: { mode: 'dark' },
-                grid: {
-                    xaxis: { lines: { show: true } }
-                }
-            };
+            function tickParticles() {
+                ctx.clearRect(0, 0, heroCanvas.width, heroCanvas.height);
 
-            chartBarKorelasi = new ApexCharts(document.querySelector("#chart-heatmap"), optionsBarKorelasi);
-            chartBarKorelasi.render();
+                // Mendapatkan warna dari mode gelap atau terang
+                const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+                const lineRGB = isLight ? '20,40,70' : '255,255,255';
 
-            // 4. FEATURE IMPORTANCE BAR
-            // ==========================================================
-            // GRAFIK 3: KOMPARASI JAWA VS SUMATRA (PERSIS SEPERTI FOTO)
-            // ==========================================================
-
-            // Konfigurasi Umum agar style sama persis
-            var commonChartOptions = {
-                chart: {
-                    type: 'bar',
-                    height: 400,
-                    toolbar: { show: false },
-                    background: 'transparent'
-                },
-                plotOptions: {
-                    bar: {
-                        horizontal: true,
-                        barHeight: '50%', // Ketebalan batang
-                        colors: {
-                            ranges: [
-                                { from: -10, to: 0, color: '#008080' }, // Hijau Tosca untuk nilai negatif (kiri)
-                                { from: 0.001, to: 10, color: '#B22222' } // Merah Gelap untuk nilai positif (kanan)
-                            ]
+                for (let i = 0; i < pts.length; i++) {
+                    for (let j = i + 1; j < pts.length; j++) {
+                        const dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y, d = Math.hypot(dx, dy);
+                        if (d < 120) {
+                            ctx.beginPath();
+                            ctx.strokeStyle = `rgba(${lineRGB},${(1 - d / 120) * 0.08})`;
+                            ctx.lineWidth = 0.5;
+                            ctx.moveTo(pts[i].x, pts[i].y);
+                            ctx.lineTo(pts[j].x, pts[j].y);
+                            ctx.stroke();
                         }
                     }
-                },
-                dataLabels: { enabled: false }, // Dimatikan karena di foto tidak ada angka di dalam batang
-                grid: {
-                    show: false, // Menghilangkan garis background
-                },
-                yaxis: {
-                    labels: {
-                        style: { colors: '#222', fontSize: '12px', fontFamily: 'Arial' }
-                    },
-                    axisBorder: { show: true, color: '#333' },
-                    axisTicks: { show: true, color: '#333' }
-                },
-                xaxis: {
-                    title: {
-                        text: 'Standardized Beta Coefficient',
-                        style: { color: '#222', fontSize: '13px', fontFamily: 'Arial', fontWeight: 500 }
-                    },
-                    labels: { style: { colors: '#222', fontFamily: 'Arial' } },
-                    axisBorder: { show: true, color: '#333' },
-                    axisTicks: { show: true, color: '#333' }
-                },
-                annotations: {
-                    xaxis: [{
-                        x: 0,
-                        strokeDashArray: 0,
-                        borderColor: '#222', // Garis tengah nol warna hitam pekat
-                        borderWidth: 1.5
-                    }]
-                },
-                tooltip: { theme: 'light' }
-            };
+                }
 
-            // 1. DATA PULAU JAWA
-            var optionsJawa = Object.assign({}, commonChartOptions, {
-                series: [{
-                    name: 'Beta Coefficient',
-                    // Angka disesuaikan dengan posisi batang di gambar (Jawa)
-                    data: [-2.85, -0.61, -0.55, 0.55, -0.31, 0.27, -0.09, 0.09]
-                }],
-                xaxis: Object.assign({}, commonChartOptions.xaxis, {
-                    categories: [
-                        'Lama Sekolah (Thn)',
-                        'Pengangguran (%)',
-                        'PDRB (Rp)',
-                        'Pengeluaran per Kapita (Ribu Rp)',
-                        'Sanitasi Layak (%)',
-                        'Umur Harapan Hidup (Thn)',
-                        'Air Minum Layak (%)',
-                        'Partisipasi Angkatan Kerja (%)'
-                    ]
-                })
-            });
+                pts.forEach(p => {
+                    p.ph += p.ps;
+                    const a = p.alpha + Math.sin(p.ph) * 0.1;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(${hex2rgb(p.color)},${a})`;
+                    ctx.fill();
+                    p.x += p.vx; p.y += p.vy;
+                    if (p.x < -10) p.x = heroCanvas.width + 10;
+                    if (p.x > heroCanvas.width + 10) p.x = -10;
+                    if (p.y < -10) p.y = heroCanvas.height + 10;
+                    if (p.y > heroCanvas.height + 10) p.y = -10;
+                });
 
-            // 2. DATA PULAU SUMATRA
-            var optionsSumatra = Object.assign({}, commonChartOptions, {
-                series: [{
-                    name: 'Beta Coefficient',
-                    // Angka disesuaikan dengan posisi batang di gambar (Sumatra)
-                    data: [-2.45, -1.22, 0.51, 0.35, 0.26, -0.19, 0.14, -0.02]
-                }],
-                xaxis: Object.assign({}, commonChartOptions.xaxis, {
-                    categories: [
-                        'Pengeluaran per Kapita (Ribu Rp)',
-                        'Umur Harapan Hidup (Thn)',
-                        'Pengangguran (%)',
-                        'Air Minum Layak (%)',
-                        'Lama Sekolah (Thn)',
-                        'Sanitasi Layak (%)',
-                        'Partisipasi Angkatan Kerja (%)',
-                        'PDRB (Rp)'
-                    ]
-                })
-            });
-
-            // Render Grafik Jawa
-            var chartJawa = new ApexCharts(document.querySelector("#chart-jawa"), optionsJawa);
-            chartJawa.render();
-
-            // Render Grafik Sumatra
-            var chartSumatra = new ApexCharts(document.querySelector("#chart-sumatra"), optionsSumatra);
-            chartSumatra.render();
-
-            // Sinkronkan boxplot & bar korelasi dengan tema yang tersimpan
-            if (initialTheme === 'light') {
-                updateChartsForTheme('light');
+                requestAnimationFrame(tickParticles);
             }
-        });
+            tickParticles();
+        }
+
     </script>
 </body>
 
